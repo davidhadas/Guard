@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import random
-import CF.cf.evaluator as evaluator
+import evaluator as evaluator
 import numpy as np
 import traceback
 import sys

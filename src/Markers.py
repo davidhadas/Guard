@@ -58,7 +58,8 @@ class Markers(Modeler.Modeler):
         self.c[fname_idx, key_idx] = c
         self.mean[fname_idx, key_idx] = m
         self.sdev[fname_idx, key_idx] = sdev
-
+        print("mean is now", self.mean)
+        print("sdev is now", self.sdev)
 
 
 
@@ -91,9 +92,9 @@ class Markers(Modeler.Modeler):
         self.currentSample = sarray = np.tile(data, (self.maxConcepts, 1)).T
 
         self.z = np.divide(np.absolute(sarray - self.mean), self.sdev)
-        print("markers self.z", self.z)
+        #print("markers self.z", self.z)
         self.p = np.amin(self.z, axis=1)
-        print ("markers self.p", self.p)
+        #print ("markers self.p", self.p)
 
     def learn(self):
         super().learn()
@@ -102,9 +103,9 @@ class Markers(Modeler.Modeler):
             samples = self.skippedSamples[fname_idx]
             samples.append(self.currentSample[fname_idx][0])
             c = len(samples)
-            print("skip ", fname_idx, self.p[fname_idx], c)
+            #print("skip ", fname_idx, self.p[fname_idx], c)
 
-            if c > 10:
+            if c > 100:
                 print("*** Markers *** Learn MEAN and SDEV")
                 key_idx = self.getKeyIdx(fname_idx)
                 if (key_idx != None):
@@ -125,6 +126,8 @@ class Markers(Modeler.Modeler):
                         , "c": c
                     }
                     self.storeItem(fname_idx, key_idx, val)
+                    print("mean is now", self.mean)
+                    print("sdev is now", self.sdev)
 
                 print("*** Markers *** Learn MEAN and SDEV - clear")
                 self.skippedSamples[fname_idx] = []
@@ -132,7 +135,7 @@ class Markers(Modeler.Modeler):
 
 
         indexs = (self.z == np.tile(self.p, (self.maxConcepts, 1)).T)
-        print("drift all ", indexs)
+        #print("drift all ", indexs)
         s = self.currentSample[indexs]
         self.my_c[indexs] += 1
         self.my_s[indexs] += s

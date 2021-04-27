@@ -399,8 +399,10 @@ def watchGates():
 
 
 
-
-config.load_incluster_config()
+try:
+    config.load_incluster_config()
+except:
+    print("config.load_incluster_config() exception")
 # v1 = client.CoreV1Api()
 api = client.CustomObjectsApi()
 

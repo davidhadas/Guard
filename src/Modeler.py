@@ -113,11 +113,11 @@ class Modeler:
         fname = self.featureNames[fname_idx]
         key_idx = len(self.keys[fname])
         if (self.maxConcepts > key_idx):
-            print("Modeler", self.name, fname, "asks for getKeyIdx", key_idx)
+            #print("Modeler", self.name, fname, "asks for getKeyIdx", key_idx)
             key = secrets.token_hex(nbytes=8)
             self.keys[fname].append(key)
             return key_idx
-        print("Modeler", self.name, fname, " was masked by getKeyIdx")
+        #print("Modeler", self.name, fname, " was masked by getKeyIdx")
         self.cmask[fname_idx] = True
         return None
 
@@ -128,13 +128,13 @@ class Modeler:
         status[self.name] = self.status
 
     def assess(self, data):
-        print("ASSES self.numExpandedFeatures =", self.numExpandedFeatures)
-        print(data)
+        #print("ASSES self.numExpandedFeatures =", self.numExpandedFeatures)
+        #print(data)
         data = data[self.name]
         if not data:
             print("Modeler", self.name, "assess - No Data", data)
             return([])
-        print("Asses", self.name, "has",len(data), "expand", self.numExpandedFeatures)
+        #print("Asses", self.name, "has",len(data), "expand", self.numExpandedFeatures)
         if (self.numExpandedFeatures):
             if (len(data) != self.numExpandedFeatures):
                 print("Modeler", self.name, "assess - wrong num of expanded features in data", len(data), self.numExpandedFeatures)
@@ -150,7 +150,7 @@ class Modeler:
                 p = self.p
                 n = self.n
                 if (n < self.minimumLearning):
-                    print("n", n)
+                    #print("n", n)
                     p = np.zeros(self.numFeatures)
                 p[self.cmask] = 0
             except:
