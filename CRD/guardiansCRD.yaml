@@ -1,0 +1,77 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  # name must be in the form: <spec.plural>.<group>.
+  name: guardians.ibmresearch.com
+spec:
+  # group name to use for REST API: /apis/<spec.group>/<spec.version>
+  # This example a format of REST API would be: /apis/insujang.github.io/v1beta1
+  # apiVersion in yaml files to create this CRD type should be same with this value.
+  group: ibmresearch.com
+  version: v1beta1
+  # either "Namespaced" or "Cluster" (unnamespaced object such as CRD itself).
+  # You can specify which resources in a namespace by $ kubectl api-resources --namespaced=true
+  # or not in a namespace by $ kubectl api-resources --namespaced=false.
+  scope: Namespaced
+  names:
+    kind: Guardians
+    listKind: GuardianList
+    # plural name to be used in the URL: /apis/<spec.group>/<spec.version>/<plural>
+    plural: guardians
+    # signalur name to be used as an alias on the CLI and for the display
+    singular: guardian
+
+  # By specifying OpenAPI v3.0 validation schema, we can add some restrictions on CRD objects,
+  # such like any objects with this CRD type are required to have some properties,
+  # or its pattern should be match with a regular expression, etc. [^5]
+  # This CRD requires to have two properties: "command" and "custom_property".
+  #versions:
+  #  - name: v1
+  #    # Each version can be enabled/disabled by served flag.
+  #    served: true
+  #    # OPne any only one version must be marked as the storage version.
+  #    storage: true
+  #    schema:
+  #      openAPIV3Schema:
+  #        type: object
+  #        properties:
+  #          apiVersion:
+  #            type: string
+  #          kind:
+  #            type: string
+  #          metadata:
+  #            type: object
+  #          spec:
+  #            properties:
+  #              collectorId:
+  #                type: string
+  #              guardianName:
+  #                type: string
+  #              serviceId:
+  #                type: string
+  #              # Always allow and learn in the first n specified use cases
+  #              minimumLearning:
+  #                type: integer
+  #              # 0 always learn
+  #              # >0 conditionally learn
+  #              # higher means learn if suspects less
+  #              fingerprintLearnLimit:
+  #                type: integer
+  #              # 0 always allow
+  #              # >0 conditionally allow
+  #              # higher means allow if suspects less
+  #              fingerprintAllowLimit:
+  #                type: integer
+  #
+  #            required:
+  #            - collectorId
+  #            - serviceId
+  #            - guardianName
+  #            - minimumLearning
+  #            - fingerprintLearnLimit
+  #            - fingerprintAllowLimit
+  #
+  #    required:
+  #    - apiVersion
+  #    - kind
+  #    - spec

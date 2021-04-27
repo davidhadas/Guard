@@ -1,0 +1,7 @@
+gunicorn==20.0.4
+flask
+numpy
+scipy
+apscheduler
+gevent
+kubernetes
