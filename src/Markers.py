@@ -4,7 +4,7 @@ import Modeler
 import math
 # import statistics
 
-
+import gvu
 
 class Markers(Modeler.Modeler):
     name = "markers"
@@ -22,10 +22,14 @@ class Markers(Modeler.Modeler):
         super().__init__(spec)
         self.threeStdQuantile = self.adjusted3Stddevs[0]
 
+
     def reset(self):
         self.mean = np.ones((self.numFeatures, self.maxConcepts))*np.finfo(np.float64).min
         self.sdev = np.ones((self.numFeatures, self.maxConcepts))
-        self.c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
+
+        self.z = np.zeros((self.numFeatures, self.maxConcepts))
+        self.currentSample = np.zeros((self.numFeatures, self.maxConcepts))
+        #self.c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
 
         self.base_s = np.zeros((self.numFeatures, self.maxConcepts))
         self.base_s2 = np.zeros((self.numFeatures, self.maxConcepts))
@@ -37,6 +41,9 @@ class Markers(Modeler.Modeler):
         self.my_c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
 
         self.skippedSamples = [[] for _ in range(self.numFeatures)]
+        self.g = [gvu.gvu() for _ in range(self.numFeatures)]
+        for g in self.g:
+            g.clear()
 
     def load(self, fname_idx, key_idx, val):
         c = int(val["c"])
@@ -55,12 +62,10 @@ class Markers(Modeler.Modeler):
         m = s / c
         sdev = math.sqrt(max(s2 / c - m ** 2, np.finfo(np.float64).eps))
 
-        self.c[fname_idx, key_idx] = c
+        #self.c[fname_idx, key_idx] = c
         self.mean[fname_idx, key_idx] = m
         self.sdev[fname_idx, key_idx] = sdev
-        print("mean is now", self.mean)
-        print("sdev is now", self.sdev)
-
+        self.printCurrentFeatures()
 
 
     def store(self):
@@ -76,6 +81,34 @@ class Markers(Modeler.Modeler):
                 c  = int(self.base_c[fname_idx, key_idx])
                 if (c<=0):
                     continue
+                # merge
+                for key_idx_other in range(key_idx + 1, self.maxConcepts):
+                    c_other = int(self.base_c[fname_idx, key_idx_other])
+                    if (c_other <= 0):
+                        continue
+                    mu1 = self.mean[fname_idx][key_idx]
+                    sdev1 = self.sdev[fname_idx][key_idx]
+                    mu2 = self.mean[fname_idx][key_idx_other]
+                    sdev2 = self.sdev[fname_idx][key_idx_other]
+                    if ((mu1 - 3 * sdev1 < mu2 < mu1 + 3 * sdev1) or
+                        (mu2 - 3 * sdev2 < mu1 < mu2 + 3 * sdev2)):
+                        print("*** MERGING START ***", fname_idx, mu1, sdev1, mu2, sdev2)
+                        c += c_other
+                        s = self.base_s[fname_idx][key_idx] + self.base_s[fname_idx][key_idx_other]
+                        s2 = self.base_s2[fname_idx][key_idx] + self.base_s2[fname_idx][key_idx_other]
+
+                        self.base_c[fname_idx, key_idx] = c
+                        self.base_s[fname_idx, key_idx] = s
+                        self.base_s2[fname_idx, key_idx] = s2
+                        self.base_c[fname_idx, key_idx_other] = 0
+
+                        m = s / c
+                        sdev = math.sqrt(max(s2 / c - m ** 2, np.finfo(np.float64).eps))
+                        self.mean[fname_idx, key_idx] = m
+                        self.sdev[fname_idx, key_idx] = sdev
+                        self.delKeyIdx(fname_idx, key_idx_other)
+                        print("*** MERGING END ***", fname_idx, mu, sdev)
+
                 val = {
                       "s2": float(self.base_s2[fname_idx, key_idx])
                     , "s":  float(self.base_s[fname_idx, key_idx])
@@ -87,6 +120,7 @@ class Markers(Modeler.Modeler):
         self.my_s = np.zeros((self.numFeatures, self.maxConcepts))
         self.my_s2 = np.zeros((self.numFeatures, self.maxConcepts))
 
+        self.printCurrentFeatures()
 
     def calc(self, data):
         self.currentSample = sarray = np.tile(data, (self.maxConcepts, 1)).T
@@ -97,6 +131,53 @@ class Markers(Modeler.Modeler):
         #print ("markers self.p", self.p)
 
     def learn(self):
+        for fname_idx in np.where(self.p >= self.threeStdQuantile)[0]:
+
+            self.p[fname_idx] = self.threeStdQuantile
+            g = self.g[fname_idx]
+            if (g.addPoint(self.currentSample[fname_idx][0]) > 100):
+                print("*** Markers *** Learn MEAN and SDEV")
+                key_idx = self.getKeyIdx(fname_idx)
+                if (key_idx != None):
+                    print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
+                    result = g.getGuassian()
+                    mu = result["driftedGuassian"]["mu"]
+                    sdev = result["driftedGuassian"]["sdev"]
+                    c = result["driftedGuassian"]["c"]
+                    s = mu*c
+                    s2 = (sdev**2 + mu**2)*c
+                    self.my_c[fname_idx][key_idx] = c
+                    self.my_s[fname_idx][key_idx] = s
+                    self.my_s2[fname_idx][key_idx] = s2
+
+                    #self.c[fname_idx][key_idx] = c
+                    self.mean[fname_idx][key_idx] = mu
+                    self.sdev[fname_idx][key_idx] = sdev
+                    val = {
+                        "s2": s2
+                        , "s": s
+                        , "c": c
+                    }
+
+                    self.storeItem(fname_idx, key_idx, val)
+                    self.printCurrentFeatures()
+                print("*** Markers *** Learn MEAN and SDEV - clear")
+                g.clear()
+
+
+        indexs = (self.z == np.tile(self.p, (self.maxConcepts, 1)).T)
+        #print("drift all ", indexs)
+        s = self.currentSample[indexs]
+        self.my_c[indexs] += 1
+        self.my_s[indexs] += s
+        self.my_s2[indexs] += np.square(s)
+
+    def printCurrentFeatures(self):
+        for idx, name in enumerate(self.featureNames):
+            print(name, self.mean[idx], self.sdev[idx], self.cmask[idx], len(self.g[idx].points), self.base_c[idx], self.base_s[idx], self.base_s2[idx])
+
+
+    def learn2(self):
         super().learn()
         for fname_idx in np.where(self.p >= self.threeStdQuantile)[0]:
             self.p[fname_idx] = self.threeStdQuantile
@@ -117,7 +198,7 @@ class Markers(Modeler.Modeler):
                     self.my_s[fname_idx][key_idx] = s
                     self.my_s2[fname_idx][key_idx] = s2
 
-                    self.c[fname_idx][key_idx] = c
+                    #self.c[fname_idx][key_idx] = c
                     self.mean[fname_idx][key_idx] = m
                     self.sdev[fname_idx][key_idx] = max(np.sqrt(s2/c - np.square(m)), np.finfo(np.float64).eps)
                     val = {
@@ -126,13 +207,10 @@ class Markers(Modeler.Modeler):
                         , "c": c
                     }
                     self.storeItem(fname_idx, key_idx, val)
-                    print("mean is now", self.mean)
-                    print("sdev is now", self.sdev)
+                    self.printCurrentFeatures()
 
                 print("*** Markers *** Learn MEAN and SDEV - clear")
                 self.skippedSamples[fname_idx] = []
-
-
 
         indexs = (self.z == np.tile(self.p, (self.maxConcepts, 1)).T)
         #print("drift all ", indexs)
@@ -142,6 +220,18 @@ class Markers(Modeler.Modeler):
         self.my_s2[indexs] += np.square(s)
 
 
-
-
 Modeler.modelers.append(Markers)
+
+m = Markers({
+        "markers": ["test"]
+      , "AllowLimit": 10
+      , "LearnLimit": 3
+      , "collectorId": "mygate"
+      , "minimumLearning": 1000
+})
+
+for i in range(1000):
+    m.assess({'markers': [0]})
+    m.learn()
+    m.assess({'markers': [0]})
+    m.learn()

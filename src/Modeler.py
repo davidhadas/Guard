@@ -2,6 +2,8 @@ import numpy as np
 import sys
 import traceback
 import secrets
+import random
+import math
 # from scipy.stats import norm
 
 modelers = []
@@ -37,7 +39,8 @@ class Modeler:
         self.featureNames = spec[self.name]
         self.LearnLimit = spec["LearnLimit"]
         self.AllowLimit = spec["AllowLimit"]
-        self.minimumLearning = spec["minimumLearning"]
+        self.minimumLearning = min(spec["minimumLearning"],100)
+        self.learningGama = -math.log(0.5)/self.minimumLearning
 
         if (hasattr(self, 'expandFeatures') and hasattr(self, 'expandData')):
             self.numExpandedFeatures = len(self.featureNames)
@@ -84,6 +87,8 @@ class Modeler:
 
             fname_idx = self.featureNames.index(fname)
             for key, val in values.items():
+                if not val:
+                    continue
                 #print("load",fname,  fname_idx, key, val)
                 self.status[fname][key] = val
                 if key not in self.keys[fname]:
@@ -121,6 +126,12 @@ class Modeler:
         self.cmask[fname_idx] = True
         return None
 
+    def delKeyIdx(self, fname_idx, key_idx):
+        keys = []
+        fname = self.featureNames[fname_idx]
+        key = self.keys[fname].pop(key_idx)
+        self.status[fname][key] = {}
+
     def crdstore(self, status):
         print("Storing", self.name)
         self.store()
@@ -149,7 +160,7 @@ class Modeler:
                 self.n += 1
                 p = self.p
                 n = self.n
-                if (n < self.minimumLearning):
+                if (random.random() < 2*math.exp(-self.learningGama * n)):
                     #print("n", n)
                     p = np.zeros(self.numFeatures)
                 p[self.cmask] = 0

@@ -13,12 +13,27 @@ import controller
 # globalData = threading.local()
 count = 0
 
+def display():
+    return list(controller.services.keys())
+
+
+def displayService(serviceid):
+    if serviceid not in controller.services:
+        return {}
+    return list(controller.services[serviceid].keys())
+
+
+def displayServiceGate(serviceid, gateid):
+    if serviceid not in controller.services or gateid not in controller.services[serviceid]:
+        return {}
+    return controller.services[serviceid][gateid]["status"]
+
 
 def evaluate(serviceId, gateId, triggerInstance, data):
     # get the model for (serviceId, collectorId)
     global count
     count += 1
-    print("evaluate count:", count, flush=True)
+    print("*** Evaluate:", serviceId, gateId, triggerInstance, flush=True)
 
     gateSpec, modelers  = controller.serve(serviceId, gateId)
 
@@ -38,13 +53,14 @@ def evaluate(serviceId, gateId, triggerInstance, data):
         p += m.assess(data)
         m.verbose()
 
-    print ("**********> Results: p =",p)
-    if all(i <= LearnLimit for i in p):
-        print("Learning OK")
+    print ("**********> Results: p =",p, serviceId, gateId)
+
+    if sum(i > LearnLimit 5 for i in j) < 2:
+        print("Learning OK", serviceId, gateId)
         for m in modelers:
             m.learn()
     else:
-        print("Learning NOK")
+        print("Learning NOK", serviceId, gateId)
 
     if all(i <= AllowLimit for i in p):
         print("Allow OK", flush=True)

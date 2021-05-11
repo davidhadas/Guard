@@ -15,12 +15,28 @@ def evaluate(serviceId, collectorId, triggerInstance, data):
 
 
 app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 
-@app.route('/')
-def index():
-    print ("/ called")
-    return 'Hello world!'
+@app.route('/display/')
+def display():
+    print("/display called")
+    d = evaluator.display()
+    return jsonify(d)
+
+
+@app.route('/display/<serviceid>')
+def displayService(serviceid):
+    print("/displayService called")
+    d = evaluator.displayService(serviceid)
+    return jsonify(d)
+
+
+@app.route('/display/<serviceid>/<gateid>')
+def displayServiceGate(serviceid, gateid):
+    print ("/displayServiceGate called")
+    d = evaluator.displayServiceGate(serviceid, gateid)
+    return jsonify(d)
 
 
 @app.route('/eval', methods=['POST'])

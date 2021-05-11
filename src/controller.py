@@ -7,9 +7,10 @@ import os
 import sys
 import traceback
 import Modeler
-import Markers
+#import Markers
+import Integers
 #import Fingerprints
-import Histograms
+#import Histograms
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
@@ -21,6 +22,9 @@ services = {}
 modelers = Modeler.modelers
 
 reloadGuardians = True
+
+
+
 
 def serve(serviceId, gateId):
     if serviceId not in services:
@@ -36,9 +40,9 @@ def serve(serviceId, gateId):
     if gateId not in services[serviceId]:
         print("Controller  - serving a new gate for service!!", serviceId, gateId)
         createGuardian(gateId, serviceId)
-        services[serviceId][gateId] = [m(gateSpec) for m in modelers]
+        services[serviceId][gateId] = {"modelers": [m(gateSpec) for m in modelers], "status": {}}
 
-    return gateSpec, services[serviceId][gateId]
+    return gateSpec, services[serviceId][gateId]["modelers"]
 
 '''
 def deleteGuardian(gateId, serviceId):
@@ -211,14 +215,15 @@ def watchGuardians():
 
                     if gateId not in services[serviceId]:
                         print("new Guardian found - initializing all modelers", serviceId, gateId, services[serviceId], flush=True)
-                        services[serviceId][gateId] = [m(gate["spec"]) for m in modelers]
+                        services[serviceId][gateId] = {"modelers": [m(gate["spec"]) for m in modelers], "status": status}
 
 
                     if t == "DELETED":
                         status = {}
                         del services[serviceId][gateId]
                     if t == "MODIFIED" or t == "ADDED":
-                        for m in services[serviceId][gateId]:
+                        services[serviceId][gateId]["status"] = status
+                        for m in services[serviceId][gateId]["modelers"]:
                             m.crdload(status)
 
                     print("GGG... Guradian successfuly updated", num, guardianId, resourceVersion, flush=True)
@@ -253,8 +258,8 @@ def watchGuardians():
                     gateId = random.choice(list(services[serviceId].keys()))
                     print("watchGuardians storing..", serviceId, gateId, services[serviceId][gateId])
                     status = {}
-                    for g in services[serviceId][gateId]:
-                        g.crdstore(status)
+                    for m in services[serviceId][gateId]["modelers"]:
+                        m.crdstore(status)
                     status = {"status": status}
                     print("Patching guardian crd...", gateId, serviceId, status, flush=True)
                     patchGuardian(gateId, serviceId, status)
@@ -358,8 +363,8 @@ def watchGates():
                         del (gates[gateId])
                     for serviceId, service in services.items():
                         if (gateId in service):
-                            for g in service[gateId]:
-                                g.configFromGate(gateSpec)
+                            for m in service[gateId]["modelers"]:
+                                m.configFromGate(gateSpec)
 
                     reloadGuardians = True
 
