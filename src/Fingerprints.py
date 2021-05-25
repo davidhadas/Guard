@@ -58,7 +58,7 @@ class Fingerprints(Modeler.Modeler):
                 try:
                     if (fv == '*'):
                         self.featureValues[i] = ['*']
-                        self.cmask[i] = True
+                        self.mask(i, "load2")
                         self.model[i] = np.zeros(self.maxConcepts, dtype=int)
                         self.base[i] = np.zeros(self.maxConcepts, dtype=int)
                         self.base[i, 0] = sum(mystatus[i].values())
@@ -73,7 +73,7 @@ class Fingerprints(Modeler.Modeler):
                         self.base[i, j] = int(m)
                     else:
                         self.featureValues[i] = ['*']
-                        self.cmask[i] = True
+                        self.mask(i, "during load2")
                         self.model[i] = np.zeros(self.maxConcepts, dtype=int)
                         self.base[i] = np.zeros(self.maxConcepts, dtype=int)
                         self.model[i, 0] = self.n
@@ -178,7 +178,7 @@ class Fingerprints(Modeler.Modeler):
                 else:
                     featureValues[i] = ['*']
                     print("Masking out fingerprint", i)
-                    self.cmask[i] = True
+                    self.mask(i, "during calc2")
                     self.currentSample[i] = 0
                     base_n = np.sum(self.base[i])
                     n = np.sum(self.model[i])
@@ -206,11 +206,6 @@ class Fingerprints(Modeler.Modeler):
 
     def learn2(self):
         return
-        #foundmap[self.cmask] = True
-
-        #for fname_idx in np.where(np.logical_not(foundmap))[0]:
-
-
 
 
         indexes = self.indexes

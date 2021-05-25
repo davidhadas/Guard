@@ -61,4 +61,4 @@ def send(param):
     print(res)
 
 for i in range(1000):
-    send({"bodyVal": 4})
+    send({"queryKeys": 3})

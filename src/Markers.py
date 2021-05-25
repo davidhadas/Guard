@@ -46,6 +46,7 @@ class Markers(Modeler.Modeler):
             g.clear()
 
     def load(self, fname_idx, key_idx, val):
+        print (val)
         c = int(val["c"])
         s = float(val["s"])
         s2 = float(val["s2"])
@@ -107,14 +108,14 @@ class Markers(Modeler.Modeler):
                         self.mean[fname_idx, key_idx] = m
                         self.sdev[fname_idx, key_idx] = sdev
                         self.delKeyIdx(fname_idx, key_idx_other)
-                        print("*** MERGING END ***", fname_idx, mu, sdev)
+                        print("*** MERGING END ***", fname_idx, m, sdev)
 
                 val = {
                       "s2": float(self.base_s2[fname_idx, key_idx])
                     , "s":  float(self.base_s[fname_idx, key_idx])
                     , "c":  c
                 }
-                self.storeItem(fname_idx, key_idx,val)
+                self.storeItem(fname_idx, key_idx, val)
 
         self.my_c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
         self.my_s = np.zeros((self.numFeatures, self.maxConcepts))
@@ -136,10 +137,10 @@ class Markers(Modeler.Modeler):
             self.p[fname_idx] = self.threeStdQuantile
             g = self.g[fname_idx]
             if (g.addPoint(self.currentSample[fname_idx][0]) > 100):
-                print("*** Markers *** Learn MEAN and SDEV")
+                #print("*** Markers *** Learn MEAN and SDEV")
                 key_idx = self.getKeyIdx(fname_idx)
-                if (key_idx != None):
-                    print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
+                if key_idx is not None:
+                    #print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
                     result = g.getGuassian()
                     mu = result["driftedGuassian"]["mu"]
                     sdev = result["driftedGuassian"]["sdev"]
@@ -161,7 +162,7 @@ class Markers(Modeler.Modeler):
 
                     self.storeItem(fname_idx, key_idx, val)
                     self.printCurrentFeatures()
-                print("*** Markers *** Learn MEAN and SDEV - clear")
+                #print("*** Markers *** Learn MEAN and SDEV - clear")
                 g.clear()
 
 
@@ -173,8 +174,9 @@ class Markers(Modeler.Modeler):
         self.my_s2[indexs] += np.square(s)
 
     def printCurrentFeatures(self):
+        return
         for idx, name in enumerate(self.featureNames):
-            print(name, self.mean[idx], self.sdev[idx], self.cmask[idx], len(self.g[idx].points), self.base_c[idx], self.base_s[idx], self.base_s2[idx])
+            print("printCurrentFeatures", name, self.mean[idx], self.sdev[idx], self.cmask[idx], len(self.g[idx].points), self.base_c[idx], self.base_s[idx], self.base_s2[idx])
 
 
     def learn2(self):
@@ -187,10 +189,10 @@ class Markers(Modeler.Modeler):
             #print("skip ", fname_idx, self.p[fname_idx], c)
 
             if c > 100:
-                print("*** Markers *** Learn MEAN and SDEV")
+                #print("*** Markers *** Learn MEAN and SDEV")
                 key_idx = self.getKeyIdx(fname_idx)
-                if (key_idx != None):
-                    print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
+                if key_idx is not None:
+                    #print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
                     s = float(np.sum(samples))
                     s2 = float(np.sum(np.square(samples)))
                     m = s/c
@@ -209,7 +211,7 @@ class Markers(Modeler.Modeler):
                     self.storeItem(fname_idx, key_idx, val)
                     self.printCurrentFeatures()
 
-                print("*** Markers *** Learn MEAN and SDEV - clear")
+                #print("*** Markers *** Learn MEAN and SDEV - clear")
                 self.skippedSamples[fname_idx] = []
 
         indexs = (self.z == np.tile(self.p, (self.maxConcepts, 1)).T)
@@ -221,17 +223,3 @@ class Markers(Modeler.Modeler):
 
 
 Modeler.modelers.append(Markers)
-
-m = Markers({
-        "markers": ["test"]
-      , "AllowLimit": 10
-      , "LearnLimit": 3
-      , "collectorId": "mygate"
-      , "minimumLearning": 1000
-})
-
-for i in range(1000):
-    m.assess({'markers': [0]})
-    m.learn()
-    m.assess({'markers': [0]})
-    m.learn()

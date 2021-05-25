@@ -20,11 +20,9 @@ class Histograms(Markers.Markers):
             #print("expendData handling ", hist)
 
             for idx, val in enumerate(hist):
-
-                val += sys.float_info.epsilon
-                d.append(val/(sys.float_info.epsilon + hist[(idx+1)%self.histLen]))
+                d.append(max(1, 1+val)/max(1, 1+hist[(idx+1)%self.histLen]))
                 #print("While expendData", len(d), idx, val)
-        #print("After expendData",len(d))
+        print("After expendData",d)
         return d
 
 Modeler.modelers.append(Histograms)

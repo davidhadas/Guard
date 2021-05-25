@@ -55,7 +55,7 @@ def evaluate(serviceId, gateId, triggerInstance, data):
 
     print ("**********> Results: p =",p, serviceId, gateId)
 
-    if sum(i > LearnLimit 5 for i in j) < 2:
+    if sum(i > LearnLimit for i in p) < 2:
         print("Learning OK", serviceId, gateId)
         for m in modelers:
             m.learn()

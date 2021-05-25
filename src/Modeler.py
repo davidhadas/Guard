@@ -62,6 +62,15 @@ class Modeler:
             self.keys[fname] = []
         self.reset()
 
+    def mask(self, fname_idx, text):
+        fname = self.featureNames[fname_idx]
+        print("Modeler", self.name, fname, text)
+
+        self.cmask[fname_idx] = True
+        self.keys[fname] = []
+        self.status[fname] = {"tombstone": {}}
+
+
     def crdload(self, status):
         #print(" CRD Loading", self.name)
         if not self.name in status:
@@ -73,36 +82,70 @@ class Modeler:
             self.modelerReset()
             return
 
+        if "_n" not in mystatus:
+            self.modelerReset()
+            return
+
+        values = mystatus["_n"]
+        if not isinstance(values, int):
+            self.modelerReset()
+            return
+
+        self.n = values
+
         for fname, values in mystatus.items():
-            if fname == "_n":
-                if isinstance(values, int):
-                    self.n = values
+            if (fname == "_n"):
                 continue
-
-            if not isinstance(values, dict):
-                continue
-
             if fname not in self.featureNames:
                 continue
-
             fname_idx = self.featureNames.index(fname)
-            for key, val in values.items():
-                if not val:
-                    continue
-                #print("load",fname,  fname_idx, key, val)
-                self.status[fname][key] = val
+            if (self.cmask[fname_idx]):
+                continue
+
+            # update existing concepts
+            keys = values.keys()
+            if "tombstone" in keys:
+                self.mask(fname_idx, "has tombstone during crdload")
+                continue
+
+            newKeys = []
+            for key in keys:
                 if key not in self.keys[fname]:
-                    self.keys[fname].append(key)
-                if (self.maxConcepts < len(self.keys[fname])):
-                    if (not self.cmask[fname_idx]):
-                        print("Modeler", self.name, fname, "was masked by crdload")
-                        self.cmask[fname_idx] = True
+                    newKeys.append(key)
                     continue
                 key_idx = self.keys[fname].index(key)
+                val = values[key]
+                if not val or not isinstance(val, dict) or 'c' not in val:
+                    continue
+                c = val["c"]
+                if (not isinstance(c, int)) or c < 1:
+                    continue
                 try:
                     self.load(fname_idx, key_idx, val)
                 except Exception as e:
-                    print("ilegal value while in load", fname_idx, key_idx, val, e)
+                    print("illegal value while updating existing key in load", fname_idx, key_idx, val, e)
+
+            # add new concepts
+            for key in newKeys:
+                val = values[key]
+                print ("New Concept loaded", key, val)
+                if not val or not isinstance(val, dict) or 'c' not in val:
+                    continue
+                c = val["c"]
+                if (not isinstance(c, int)) or c < 1:
+                    continue
+
+                key_idx = self.getKeyIdx(fname_idx, key=key)
+                print("New Concept loaded c", c, fname_idx, key_idx)
+                if key_idx is None:
+                    break
+                try:
+                    print("New Concept loading")
+                    self.load(fname_idx, key_idx, val)
+                except Exception as e:
+                    self.delKeyIdx(fname_idx, key_idx)
+                    print("ilegal value during new key in load", fname_idx, key_idx, val, e)
+
 
     def storeItem(self, fname_idx, key_idx, val):
         fname = self.featureNames[fname_idx]
@@ -114,28 +157,29 @@ class Modeler:
         key = self.keys[fname][key_idx]
         self.status[fname][key] = val
 
-    def getKeyIdx(self, fname_idx):
+    def getKeyIdx(self, fname_idx, key=None):
         fname = self.featureNames[fname_idx]
         key_idx = len(self.keys[fname])
         if (self.maxConcepts > key_idx):
             #print("Modeler", self.name, fname, "asks for getKeyIdx", key_idx)
-            key = secrets.token_hex(nbytes=8)
+            if not key:
+                key = secrets.token_hex(nbytes=8)
             self.keys[fname].append(key)
             return key_idx
-        #print("Modeler", self.name, fname, " was masked by getKeyIdx")
-        self.cmask[fname_idx] = True
+        self.mask(fname_idx, "masked by getKeyIdx")
         return None
 
     def delKeyIdx(self, fname_idx, key_idx):
         keys = []
         fname = self.featureNames[fname_idx]
         key = self.keys[fname].pop(key_idx)
-        self.status[fname][key] = {}
+        self.status[fname].pop(key, None)
 
     def crdstore(self, status):
         print("Storing", self.name)
         self.store()
         self.status["_n"] = self.n
+
         status[self.name] = self.status
 
     def assess(self, data):
@@ -173,6 +217,7 @@ class Modeler:
         return p.tolist()
 
     def verbose(self):
+        return
         print("Verbose", self.name, self.p)
         for fname, p in zip(self.featureNames, self.p):
             if p>self.AllowLimit:

@@ -5,7 +5,7 @@ import random
 class gvu():
     candidates = 20
     maxAccuracy = 1E-10
-    noise = 10E-8
+    noise = 1E-10
 
     def __init__(self):
         self.min = np.finfo(np.float64).max
@@ -19,7 +19,8 @@ class gvu():
         self.noise = noise
 
     def addPoint(self, point):
-        point += random.gauss(0, self.noise)
+        point += 1E-10
+        point *= random.gauss(1, self.noise)
 
         self.points.append(point)
         if (point>self.max):
@@ -32,7 +33,9 @@ class gvu():
         if (len(self.points)<30):
             return {}
         self._findGuassian()
-        return {  "guassian":{
+        print ("finished")
+        result = {
+                    "guassian":{
                           "mu":self.gmu
                         , "sdev": self.gsdev
                         , "c":  self.gc
@@ -44,6 +47,8 @@ class gvu():
                         , "explains": self.gexplains * self.dgc/self.gc
                     }
                 }
+        print(result)
+        return result
 
     def _adjustGuassian(self):
         c = self.gc
@@ -72,10 +77,11 @@ class gvu():
                     maxpoint = p
             else:
                 points.append(p)
+        print("gaussian  s/c", s, c)
         mu = s / c
-        print(c, s2, s, mu, s2 - s*mu, "s2 - s*mu", (s2 - s*mu))
-        sdev = math.sqrt(max(1E-10,(s2 - s*mu)/c))
-        print("recalc    ", c, mu, sdev)
+        #print(c, s2, s, mu, s2 - s*mu, "s2 - s*mu", (s2 - s*mu))
+        sdev = math.sqrt(max(1E-20,(s2 - s*mu)/c))
+        #print("recalc    ", c, mu, sdev)
         #print("max-min", maxpoint - minpoint, "6sdev", 6*sdev, "factor", (maxpoint - minpoint)*1.1/(6*sdev))
 
         # lets see if any of the remaining points now can adjust the guassian
@@ -102,15 +108,15 @@ class gvu():
             if not flag:
                 break
             mu = s / c
-            sdev = math.sqrt(max(1E-10,(s2 - s*mu)/c))
-            print ("add points", c, mu, sdev)
+            sdev = math.sqrt(max(1E-20,(s2 - s*mu)/c))
+            #print ("add points", c, mu, sdev)
             #print("max-min", maxpoint - minpoint, "6sdev", 6 * sdev, "factor", (maxpoint - minpoint) * 1.1 / (6 * sdev))
 
         self.dgmu = mu
         self.dgsdev = sdev
         self.dgc = c #self._evaluatePoints(mu, sdev)
         self._filterCurrentPoints(mu, sdev)
-        print("Drifted Gaussian", self.dgmu, "STD", self.dgsdev)
+        #print("Drifted Gaussian", self.dgmu, "STD", self.dgsdev)
 
 
     def _filterCurrentPoints(self, mu, sdev):
@@ -159,7 +165,7 @@ class gvu():
         pxGivenAlt = 1
 
         #print("mu", mu, "\variance", variance, "\pGaus", pGaus)
-        print("Finding Guassian in a range of", delta, "with ", numPoints, "points")
+        #print("Finding Guassian in a range of", delta, "with ", numPoints, "points")
 
         for i in range(100):
             # E_Step estimates w - the probability of each point to belong to each candidate Guassian
@@ -209,7 +215,7 @@ class gvu():
         self.gsdev = sdev[maximal][0]*delta
         self.gexplains = pGaus[maximal][0]
         self.gc = self._evaluatePoints(self.gmu, self.gsdev)
-        print("Best Gaussian", self.gmu, "STD", self.gsdev, "explains", self.gexplains, "of points")
+        #print("Best Gaussian", self.gmu, "STD", self.gsdev, "explains", self.gexplains, "of points")
 
         self._adjustGuassian()
 
