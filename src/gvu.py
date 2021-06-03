@@ -13,6 +13,8 @@ class gvu():
         self.points = []
 
     def clear(self):
+        self.min = np.finfo(np.float64).max
+        self.max = np.finfo(np.float64).min
         self.points = []
 
     def setNoise(self, noise):
