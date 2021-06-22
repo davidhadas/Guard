@@ -409,7 +409,11 @@ c = list(itertools.combinations(range(7), 2))
 #c = [(0,1), (2,3)]
 print ("numCombinations",len(c))
 aa = [autoencoder(2,1) for i in range(len(c))]
+<<<<<<< HEAD
 
+=======
+print(aa)
+>>>>>>> origin/main
 
 a = autoencoder(2,1)
 #print(a.network)
@@ -418,7 +422,11 @@ print(len(data))
 def getPair(l,pair):
     return list((l[pair[0]], l[pair[1]]))
 
+<<<<<<< HEAD
 for j in range(10000):
+=======
+for j in range(100):
+>>>>>>> origin/main
     #print ("---> ",j)
     for i in range(len(train)):
     #for i in range(1):
@@ -464,7 +472,11 @@ for i in range(len(test)):
         rejects += 1
     if (error >  10):
         block += 1
+<<<<<<< HEAD
     if (suggestNoLearn > 0.1*len(c)):
+=======
+    if (suggestNoLearn > 0.2*len(c)):
+>>>>>>> origin/main
         ResultNoLearn += 1
     if (suggestBlock > 0.1 * len(c)):
         ResultBlock += 1
@@ -501,7 +513,11 @@ for i in range(len(nodata)):
         rejects += 1
     if (error >  10):
         block += 1
+<<<<<<< HEAD
     if (suggestNoLearn > 0.1*len(c)):
+=======
+    if (suggestNoLearn > 0.2*len(c)):
+>>>>>>> origin/main
         ResultNoLearn += 1
     if (suggestBlock > 0.1 * len(c)):
         ResultBlock += 1
