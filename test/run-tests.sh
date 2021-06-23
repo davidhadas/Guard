@@ -1,1 +1,1 @@
-python3  -m unittest ../tests/*
+python  -m unittest ../tests/*
