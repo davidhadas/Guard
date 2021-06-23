@@ -46,7 +46,7 @@ class Markers(Modeler.Modeler):
             g.clear()
 
     def load(self, fname_idx, key_idx, val):
-        print (val)
+        #print (val)
         c = int(val["c"])
         s = float(val["s"])
         s2 = float(val["s2"])

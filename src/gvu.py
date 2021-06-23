@@ -89,7 +89,7 @@ class gvu():
             #print("c, s2, s, mu, s * mu", c, s2, s, mu, s * mu, "s2 - s*mu", (s2 - s * mu))
 
             sdev = math.sqrt(max(self.noise*self.noise,(s2 - s*mu)/c))
-            print ("Drifted Gaussian process c,mu,sdev", c, mu, sdev)
+            #print ("Drifted Gaussian process c,mu,sdev", c, mu, sdev)
             #print("max-min", maxpoint - minpoint, "6sdev", 6 * sdev, "factor", (maxpoint - minpoint) * 1.1 / (6 * sdev))
             points = remainingpoints
 
@@ -97,7 +97,7 @@ class gvu():
         self.dgsdev = sdev
         self.dgc = c #self._evaluatePoints(mu, sdev)
         self._filterCurrentPoints(mu, sdev)
-        print("Drifted Gaussian", self.dgmu, "STD", self.dgsdev)
+        #print("Drifted Gaussian", self.dgmu, "STD", self.dgsdev)
 
 
     def _filterCurrentPoints(self, mu, sdev):

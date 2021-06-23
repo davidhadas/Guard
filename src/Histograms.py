@@ -22,7 +22,7 @@ class Histograms(Markers.Markers):
             for idx, val in enumerate(hist):
                 d.append(max(1, 1+val)/max(1, 1+hist[(idx+1)%self.histLen]))
                 #print("While expendData", len(d), idx, val)
-        print("After expendData",d)
+        #print("After expendData",d)
         return d
 
 Modeler.modelers.append(Histograms)
