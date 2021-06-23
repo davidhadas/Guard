@@ -28,8 +28,8 @@ class MyTestCase(unittest.TestCase):
             m.learn()
 
         self.assertEqual(len(m.keys["test"]), 1)
-        self.assertAlmostEqual(m.mean[0][0], 5.0, delta=0.05)
-        self.assertLess(m.sdev[0][0], 0.5)
+        self.assertAlmostEqual(m.mean[0][0], 5.0, delta=0.2)
+        self.assertLess(m.sdev[0][0], 1.5)
         self.assertGreater(m.sdev[0][0], 0.2)
 
     def test_store_load(self):
@@ -65,6 +65,6 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("s" in val)
         self.assertTrue("s2" in val)
         self.assertAlmostEqual(1000, val["c"], delta=10)
-        self.assertAlmostEqual(val["s"], 5000, delta=10)
-        self.assertAlmostEqual(val["s2"], 25000, delta=100)
+        self.assertAlmostEqual(val["s"], 5000, delta=50)
+        self.assertAlmostEqual(val["s2"], 25000, delta=2500)
 

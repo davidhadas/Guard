@@ -102,7 +102,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("s2" in val)
         self.assertAlmostEqual(1000, val["c"], delta=10)
         self.assertAlmostEqual(1E-7, val["s"] , delta=1E-7)
-        self.assertAlmostEqual(1E-10, val["s2"], delta=1E-10)
+        self.assertAlmostEqual(1E-10, val["s2"], delta=1E-6)
 
 
         self.assertTrue("test-34" in values)
@@ -117,7 +117,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("s" in val)
         self.assertTrue("s2" in val)
         self.assertAlmostEqual(1000, val["c"], delta=10)
-        self.assertAlmostEqual(100000, val["s"] , delta=100)
+        self.assertAlmostEqual(1000000, val["s"] , delta=100)
         self.assertAlmostEqual(10000000, val["s2"], delta=1000)
 
 

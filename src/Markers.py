@@ -65,7 +65,7 @@ class Markers(Modeler.Modeler):
 
         #self.c[fname_idx, key_idx] = c
         self.mean[fname_idx, key_idx] = m
-        self.sdev[fname_idx, key_idx] = sdev
+        self.sdev[fname_idx, key_idx] = max(sdev, 1E-10)
         self.printCurrentFeatures()
 
 
@@ -104,7 +104,7 @@ class Markers(Modeler.Modeler):
                         self.base_c[fname_idx, key_idx_other] = 0
 
                         m = s / c
-                        sdev = math.sqrt(max(s2 / c - m ** 2, np.finfo(np.float64).eps))
+                        sdev = math.sqrt(max(s2 / c - m ** 2, 1E-20))
                         self.mean[fname_idx, key_idx] = m
                         self.sdev[fname_idx, key_idx] = sdev
                         self.delKeyIdx(fname_idx, key_idx_other)
@@ -129,7 +129,7 @@ class Markers(Modeler.Modeler):
         self.z = np.divide(np.absolute(sarray - self.mean), self.sdev)
         #print("markers self.z", self.z)
         self.p = np.amin(self.z, axis=1)
-        #print ("markers self.p", self.p)
+        #print ("markers self.p", self.p, sarray,  self.mean, np.absolute(sarray - self.mean), self.sdev, self.z)
 
     def learn(self):
         for fname_idx in np.where(self.p >= self.threeStdQuantile)[0]:
@@ -154,6 +154,7 @@ class Markers(Modeler.Modeler):
                     #self.c[fname_idx][key_idx] = c
                     self.mean[fname_idx][key_idx] = mu
                     self.sdev[fname_idx][key_idx] = sdev
+                    print("driftedGuassian sdev ", sdev)
                     val = {
                         "s2": s2
                         , "s": s
@@ -202,7 +203,7 @@ class Markers(Modeler.Modeler):
 
                     #self.c[fname_idx][key_idx] = c
                     self.mean[fname_idx][key_idx] = m
-                    self.sdev[fname_idx][key_idx] = max(np.sqrt(s2/c - np.square(m)), np.finfo(np.float64).eps)
+                    self.sdev[fname_idx][key_idx] = max(np.sqrt(s2/c - np.square(m)), 1E-20)
                     val = {
                         "s2": s2
                         , "s": s

@@ -225,6 +225,8 @@ class gvu2():
         points0 = (np.array(self.points0).astype(np.double) - delta_min0) / delta0
         points1 = (np.array(self.points1).astype(np.double) - delta_min1) / delta1
         numPoints = len(points0)
+
+        #check covariance - if low co-variance, no need for auto-encoder
         corrcoef = np.corrcoef(points0, points1)
         print("corrcoef", corrcoef)
         # Add noise to points to avoid later numerical problems

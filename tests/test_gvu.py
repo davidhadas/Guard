@@ -26,7 +26,7 @@ class MyTestCase(unittest.TestCase):
         c = result["driftedGuassian"]["c"]
         self.assertAlmostEqual(100,c, delta=10)
         self.assertAlmostEqual(5, mu, delta=0.5)
-        self.assertAlmostEqual(1E-10, sdev,  delta=1E-5)
+        self.assertAlmostEqual(1E-10, sdev,  delta=1E-9)
 
     def test_neg(self):
         m = gvu.gvu()
@@ -39,8 +39,8 @@ class MyTestCase(unittest.TestCase):
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
         self.assertAlmostEqual(100,c, delta=10)
-        self.assertAlmostEqual(-5, mu)
-        self.assertAlmostEqual(1E-10, sdev,  delta=1E-5)
+        self.assertAlmostEqual(-5, mu, delta=0.5)
+        self.assertAlmostEqual(1E-10, sdev,  delta=5E-9)
 
     def test_small_pos(self):
         m = gvu.gvu()
@@ -54,7 +54,7 @@ class MyTestCase(unittest.TestCase):
         c = result["driftedGuassian"]["c"]
         self.assertAlmostEqual(100,c, delta=10)
         self.assertAlmostEqual(5E-10, mu, delta=5E-10)
-        self.assertAlmostEqual(1E-10, sdev, delta=1E-5)
+        self.assertAlmostEqual(1E-10, sdev, delta=5E-9)
 
     def test_small_neg(self):
         m = gvu.gvu()
@@ -68,7 +68,7 @@ class MyTestCase(unittest.TestCase):
         c = result["driftedGuassian"]["c"]
         self.assertAlmostEqual(100,c, delta=10)
         self.assertAlmostEqual(-5E-10, mu, delta=5E-10)
-        self.assertAlmostEqual(1E-10, sdev, delta=1E-5)
+        self.assertAlmostEqual(1E-10, sdev, delta=5E-9)
 
     def test_large_pos(self):
         m = gvu.gvu()
@@ -81,8 +81,8 @@ class MyTestCase(unittest.TestCase):
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
         self.assertAlmostEqual(100,c, delta=10)
-        self.assertAlmostEqual(5E+11, mu, delta=5E+9)
-        self.assertAlmostEqual(1E+1, sdev, delta=1E+6)
+        self.assertAlmostEqual(5E+11, mu, delta=5E+10)
+        self.assertAlmostEqual(1E+1, sdev, delta=5E+2)
 
     def test_large_neg(self):
         m = gvu.gvu()
@@ -95,14 +95,15 @@ class MyTestCase(unittest.TestCase):
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
         self.assertAlmostEqual(100,c, delta=10)
-        self.assertAlmostEqual(-5E+11, mu, delta=5E+9)
-        self.assertAlmostEqual(1E+1, sdev, delta=1E+6)
+        self.assertAlmostEqual(-5E+11, mu, delta=5E+10)
+        self.assertAlmostEqual(1E+1, sdev, delta=5E+2)
 
     def test_zero(self):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(0)
         print(len(m.points))
+        print (m.points)
         result = m.getGuassian()
         print("result", result)
         mu = result["driftedGuassian"]["mu"]
@@ -110,4 +111,4 @@ class MyTestCase(unittest.TestCase):
         c = result["driftedGuassian"]["c"]
         self.assertAlmostEqual(100,c, delta=10)
         self.assertAlmostEqual(0, mu, delta=1E-9)
-        self.assertAlmostEqual(1E-10, sdev, delta=1E-9)
+        self.assertAlmostEqual(1E-10, sdev, delta=5E-9)

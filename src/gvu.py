@@ -21,8 +21,8 @@ class gvu():
         self.noise = noise
 
     def addPoint(self, point):
-        point += 1E-10
-        point *= random.gauss(1, self.noise)
+        #point += random.uniform(0, self.noise)
+        #point *= random.gauss(1, self.noise)
 
         self.points.append(point)
         if (point>self.max):
@@ -35,7 +35,7 @@ class gvu():
         if (len(self.points)<30):
             return {}
         self._findGuassian()
-        print ("finished")
+        #print ("finished")
         result = {
                     "guassian":{
                           "mu":self.gmu
@@ -49,14 +49,12 @@ class gvu():
                         , "explains": self.gexplains * self.dgc/self.gc
                     }
                 }
-        print(result)
+        #print(result)
         return result
 
     def _adjustGuassian(self):
-        c = self.gc
         mu = self.gmu
         sdev = self.gsdev
-        print("gaussian  ", c, mu, sdev)
 
         # calculate guassian based on non weighted points
         c = 0
@@ -64,38 +62,15 @@ class gvu():
         s2 = 0
         minpoint = self.max
         maxpoint = self.min
-        points = []
-        for p in self.points:
-            z = np.divide(np.absolute(p - mu), sdev)
-            # print (p, mu, sdev, z)
-            if (z <= 3):
-                c += 1
-                s += p
-                s2 += p ** 2
-                if (minpoint>p):
-                    minpoint = p
-
-                if (maxpoint < p):
-                    maxpoint = p
-            else:
-                points.append(p)
-        print("gaussian  s/c", s, c)
-        mu = s / c
-        #print(c, s2, s, mu, s2 - s*mu, "s2 - s*mu", (s2 - s*mu))
-        sdev = math.sqrt(max(1E-20,(s2 - s*mu)/c))
-        #print("recalc    ", c, mu, sdev)
-        #print("max-min", maxpoint - minpoint, "6sdev", 6*sdev, "factor", (maxpoint - minpoint)*1.1/(6*sdev))
-
-        # lets see if any of the remaining points now can adjust the guassian
+        points = self.points
+        # loop over (remaining) points and calculate the guassian
         flag = True
         while flag:
-            allpoints = points.copy()
-            points = []
+            remainingpoints = []
             flag = False
-            for p in allpoints:
+            for p in points:
                 z = np.divide(np.absolute(p - mu), sdev)
-                # print (p, mu, sdev, z)
-
+                #print (p, mu, sdev, z)
                 if (z <= 3):
                     flag = True
                     c += 1
@@ -106,19 +81,23 @@ class gvu():
                     if (maxpoint < p):
                         maxpoint = p
                 else:
-                    points.append(p)
+                    remainingpoints.append(p)
             if not flag:
                 break
+
             mu = s / c
-            sdev = math.sqrt(max(1E-20,(s2 - s*mu)/c))
-            #print ("add points", c, mu, sdev)
+            #print("c, s2, s, mu, s * mu", c, s2, s, mu, s * mu, "s2 - s*mu", (s2 - s * mu))
+
+            sdev = math.sqrt(max(self.noise*self.noise,(s2 - s*mu)/c))
+            print ("Drifted Gaussian process c,mu,sdev", c, mu, sdev)
             #print("max-min", maxpoint - minpoint, "6sdev", 6 * sdev, "factor", (maxpoint - minpoint) * 1.1 / (6 * sdev))
+            points = remainingpoints
 
         self.dgmu = mu
         self.dgsdev = sdev
         self.dgc = c #self._evaluatePoints(mu, sdev)
         self._filterCurrentPoints(mu, sdev)
-        #print("Drifted Gaussian", self.dgmu, "STD", self.dgsdev)
+        print("Drifted Gaussian", self.dgmu, "STD", self.dgsdev)
 
 
     def _filterCurrentPoints(self, mu, sdev):
@@ -143,8 +122,8 @@ class gvu():
         # The implementation evaluates a set of candidate Guassians and choose the best one at the end
 
         # Normalize data to the range 0 and 1
-        delta = (self.max - self.min)
-        delta_min = self.min #- delta
+        delta = max(self.max - self.min, self.noise)
+        delta_min = self.min  #- delta
         points = (np.array(self.points).astype(np.double) - delta_min)/delta
         numPoints = len(points)
 
