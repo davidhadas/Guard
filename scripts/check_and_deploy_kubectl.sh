@@ -139,7 +139,7 @@ spec:
       labels:
         app: %s
     spec:
-      serviceAccountName: guardian-admin
+      serviceAccountName: guardian
       automountServiceAccountToken: false
       containers:
       - name: %s
