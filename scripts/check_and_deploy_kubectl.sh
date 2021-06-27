@@ -130,6 +130,7 @@ kind: Deployment
 metadata:
   name: %s
 spec:
+  serviceAccountName: %s
   replicas: 1
   selector:
     matchLabels:
@@ -139,6 +140,7 @@ spec:
       labels:
         app: %s
     spec:
+      
       containers:
       - name: %s
         image: %s
@@ -173,7 +175,7 @@ EOT
   # Derive an application name from toolchain name ensuring it is conform to DNS-1123 subdomain
   application_name=$(echo ${IDS_PROJECT_NAME:-$IMAGE_NAME} | tr -cd '[:alnum:].-')
   printf "$deployment_content" \
-   "${application_name}" "${application_name}" "${application_name}" "${application_name}" "${IMAGE}" "${PORT}" \
+   "${application_name}" "${KUBERNETES_SERVICE_ACCOUNT_NAME}" "${application_name}" "${application_name}" "${application_name}" "${IMAGE}" "${PORT}" \
    "${application_name}" "${application_name}" "${PORT}" "${application_name}" | tee ${DEPLOYMENT_FILE}
 fi
 
