@@ -154,7 +154,7 @@ class Markers(Modeler.Modeler):
                     #self.c[fname_idx][key_idx] = c
                     self.mean[fname_idx][key_idx] = mu
                     self.sdev[fname_idx][key_idx] = sdev
-                    print("driftedGuassian sdev ", sdev)
+                    #print("driftedGuassian sdev ", sdev)
                     val = {
                         "s2": s2
                         , "s": s

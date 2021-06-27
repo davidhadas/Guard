@@ -35,7 +35,7 @@ class Modeler:
         #print("INIT self.numExpandedFeatures =", self.numExpandedFeatures)
 
     def configFromGate(self, spec):
-        print(spec)
+        #print(spec)
         self.featureNames = spec[self.name]
         self.LearnLimit = spec["LearnLimit"]
         self.AllowLimit = spec["AllowLimit"]
