@@ -139,8 +139,6 @@ spec:
       labels:
         app: %s
     spec:
-      serviceAccountName: guardian
-      automountServiceAccountToken: false
       containers:
       - name: %s
         image: %s
