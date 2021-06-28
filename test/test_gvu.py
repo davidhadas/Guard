@@ -16,9 +16,9 @@ class MyTestCase(unittest.TestCase):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(5)
-        print(len(m.points))
+        #print(len(m.points))
         result = m.getGuassian()
-        print("result", result)
+        #print("result", result)
         mu = result["driftedGuassian"]["mu"]
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
@@ -30,9 +30,9 @@ class MyTestCase(unittest.TestCase):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(-5)
-        print(len(m.points))
+        #print(len(m.points))
         result = m.getGuassian()
-        print("result", result)
+        #print("result", result)
         mu = result["driftedGuassian"]["mu"]
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
@@ -44,9 +44,9 @@ class MyTestCase(unittest.TestCase):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(5E-10)
-        print(len(m.points))
+        #print(len(m.points))
         result = m.getGuassian()
-        print("result", result)
+        #print("result", result)
         mu = result["driftedGuassian"]["mu"]
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
@@ -58,9 +58,9 @@ class MyTestCase(unittest.TestCase):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(-5E-10)
-        print(len(m.points))
+        #print(len(m.points))
         result = m.getGuassian()
-        print("result", result)
+        #print("result", result)
         mu = result["driftedGuassian"]["mu"]
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
@@ -72,9 +72,9 @@ class MyTestCase(unittest.TestCase):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(5E+11)
-        print(len(m.points))
+        #print(len(m.points))
         result = m.getGuassian()
-        print("result", result)
+        #print("result", result)
         mu = result["driftedGuassian"]["mu"]
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
@@ -86,9 +86,9 @@ class MyTestCase(unittest.TestCase):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(-5E+11)
-        print(len(m.points))
+        #print(len(m.points))
         result = m.getGuassian()
-        print("result", result)
+        #print("result", result)
         mu = result["driftedGuassian"]["mu"]
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]
@@ -100,10 +100,10 @@ class MyTestCase(unittest.TestCase):
         m = gvu.gvu()
         for i in range(100):
             m.addPoint(0)
-        print(len(m.points))
-        print (m.points)
+        #print(len(m.points))
+        #print (m.points)
         result = m.getGuassian()
-        print("result", result)
+        #print("result", result)
         mu = result["driftedGuassian"]["mu"]
         sdev = result["driftedGuassian"]["sdev"]
         c = result["driftedGuassian"]["c"]

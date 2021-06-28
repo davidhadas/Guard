@@ -28,7 +28,7 @@ class Modeler:
     maxConcepts = 1
 
     def __init__(self, spec):
-        print("New", self.name)
+        #print("New", self.name)
         self.numExpandedFeatures = 0
         self.configFromGate(spec)
         self.modelerReset()
@@ -51,7 +51,7 @@ class Modeler:
         #print("FROMGATE self.numExpandedFeatures =", self.numExpandedFeatures)
 
     def modelerReset(self):
-        print("Reset", self.name, "numFeatures", self.numFeatures)
+        #print("Reset", self.name, "numFeatures", self.numFeatures)
         self.p = np.zeros(self.numFeatures)
         self.cmask = [False for ii in range(self.numFeatures)]
         self.n = 0
@@ -128,7 +128,7 @@ class Modeler:
             # add new concepts
             for key in newKeys:
                 val = values[key]
-                print ("New Concept loaded", key, val)
+                #print ("New Concept loaded", key, val)
                 if not val or not isinstance(val, dict) or 'c' not in val:
                     continue
                 c = val["c"]
@@ -136,11 +136,11 @@ class Modeler:
                     continue
 
                 key_idx = self.getKeyIdx(fname_idx, key=key)
-                print("New Concept loaded c", c, fname_idx, key_idx)
+                #print("New Concept loaded c", c, fname_idx, key_idx)
                 if key_idx is None:
                     break
                 try:
-                    print("New Concept loading")
+                    #print("New Concept loading")
                     self.load(fname_idx, key_idx, val)
                 except Exception as e:
                     self.delKeyIdx(fname_idx, key_idx)
@@ -176,7 +176,7 @@ class Modeler:
         self.status[fname].pop(key, None)
 
     def crdstore(self, status):
-        print("Storing", self.name)
+        #print("Storing", self.name)
         self.store()
         self.status["_n"] = self.n
 

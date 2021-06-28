@@ -43,7 +43,7 @@ class MyTestCase(unittest.TestCase):
             m.learn()
         status = {}
         m.crdstore(status)
-        print(status)
+        #print(status)
 
         self.assertTrue("integers" in status)
         val = status["integers"]
