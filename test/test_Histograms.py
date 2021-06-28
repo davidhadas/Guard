@@ -1,8 +1,6 @@
-import sys
-sys.path.append('../src/')
-print(sys.path)
 
-import Histograms
+
+from Guard import Histograms
 import unittest
 
 import numpy

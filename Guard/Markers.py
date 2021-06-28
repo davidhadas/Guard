@@ -1,10 +1,13 @@
 import numpy as np
 # from scipy.stats import norm
-import Modeler
 import math
 # import statistics
 
-import gvu
+from Guard import Modeler
+from Guard import gvu
+
+
+
 
 class Markers(Modeler.Modeler):
     name = "markers"

@@ -6,7 +6,8 @@ import time
 import os
 import sys
 import traceback
-import Modeler
+
+from Guard import Modeler
 #import Markers
 import Integers
 #import Fingerprints

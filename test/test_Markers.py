@@ -1,8 +1,5 @@
-import sys
-sys.path.append('../src/')
-print(sys.path)
 
-import Markers
+from Guard import Markers
 import unittest
 
 import numpy

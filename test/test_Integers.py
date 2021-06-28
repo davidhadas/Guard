@@ -1,8 +1,5 @@
-import sys
-sys.path.append('../src/')
-print(sys.path)
 
-import Integers
+from Guard import Integers
 import unittest
 
 import numpy

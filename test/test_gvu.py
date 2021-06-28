@@ -1,8 +1,6 @@
-import sys
-sys.path.append('../src/')
-print(sys.path)
 
-import gvu
+
+from Guard import gvu
 import unittest
 
 import numpy

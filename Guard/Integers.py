@@ -1,5 +1,5 @@
-import Markers
-import Modeler
+from Guard import Markers
+from Guard import Modeler
 import sys
 
 class Integers(Markers.Markers):

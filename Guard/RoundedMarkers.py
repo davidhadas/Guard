@@ -1,7 +1,7 @@
 import numpy as np
 #from scipy.stats import norm
-import Modeler
-import Markers
+from Guard import Modeler
+from Guard import Markers
 
 
 class RoundedMarkers(Markers.Markers):

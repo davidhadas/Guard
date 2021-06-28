@@ -1,6 +1,6 @@
 import numpy as np
 #from scipy.stats import norm
-import Modeler
+from Guard import Modeler
 
 
 class Fingerprints(Modeler.Modeler):
