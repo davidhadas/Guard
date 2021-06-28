@@ -121,7 +121,7 @@ class MyTestCase(unittest.TestCase):
         delta = time.time() - startTime
 
         #print ("Time:", delta, " processing 10K samples of 100 features" )
-        self.assertLess(delta, 6)
+        self.assertLess(delta, 8)
         for i in range(100):
             self.assertGreaterEqual(len(m.keys[str(i)]), 1)
             self.assertAlmostEqual(m.mean[i][0], 0, delta=0.5)
