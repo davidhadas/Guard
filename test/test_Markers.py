@@ -494,3 +494,5 @@ class MyTestCase(unittest.TestCase):
 
 #t = unittest.TestLoader().loadTestsFromTestCase(MyTestCase)
 #unittest.TextTestRunner(verbosity=2).run(t)
+if __name__ == "__main":
+    unittest.main()
