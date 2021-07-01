@@ -8,10 +8,10 @@ import sys
 import traceback
 
 from Guard import Modeler
-#import Markers
+import Markers
 import Integers
-#import Fingerprints
-#import Histograms
+import Fingerprints
+import Histograms
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
