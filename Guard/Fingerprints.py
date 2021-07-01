@@ -17,7 +17,7 @@ class Fingerprints(Modeler.Modeler):
         self.featureValues = [{} for ii in range(self.numFeatures)]
         self.my_c = np.zeros([self.numFeatures, self.maxConcepts], dtype=int)
         self.base_c = np.zeros([self.numFeatures, self.maxConcepts], dtype=int)
-        self.c = np.zeros([self.numFeatures, self.maxConcepts], dtype=int)
+        #self.c = np.zeros([self.numFeatures, self.maxConcepts], dtype=int)
 
         self.mean = np.zeros(self.numFeatures)
         self.std = np.ones(self.numFeatures)
@@ -31,8 +31,8 @@ class Fingerprints(Modeler.Modeler):
 
         self.featureValues[fname_idx][uid] = key_idx
         self.base_c[fname_idx, key_idx] = c
-        c  += self.my_c[fname_idx, key_idx]
-        self.c[fname_idx, key_idx] = c
+        #c += self.my_c[fname_idx, key_idx]
+        #self.c[fname_idx, key_idx] = c
 
 
     def store(self):
@@ -102,11 +102,7 @@ class Fingerprints(Modeler.Modeler):
                     break
             status.append(s)
 
-
-
-
     def calc(self, data):
-
         idxarray = np.zeros(self.numFeatures, dtype=int)
         c = np.zeros(self.numFeatures, dtype=int)
         notfound = np.full(self.numFeatures, False)
@@ -114,22 +110,27 @@ class Fingerprints(Modeler.Modeler):
             if (uid in self.featureValues[fname_idx]):
                 key_idx = self.featureValues[fname_idx][uid]
                 idxarray[fname_idx] = key_idx
-                c[fname_idx] = self.c[fname_idx, key_idx] + 1
+                c[fname_idx] = self.my_c[fname_idx, key_idx] + self.base_c[fname_idx, key_idx]
             else:
                 notfound[fname_idx] = True
 
         self.currentSample = data
         self.currentIdx = idxarray
         self.notfound = notfound
+        #print ("data, idxarray, notfound,  c, self.mean, self.std", data, idxarray, notfound,  c,  self.mean, self.std)
 
-        self.p = -(c - self.mean) / self.std
-        self.p[notfound] = 100
-
-        print ("fingerprints self.p", self.p)
+        p = (self.mean - np.minimum(c, self.mean)) / self.std
+        p[notfound] = 100
+        p[self.cmask] = 0
+        self.p = p
+        #print ("fingerprints self.p", self.p, c, self.mean)
 
     def learn(self):
         super().learn()
-        for fname_idx in np.where(self.notfound)[0]:
+        newkeys = np.logical_and(self.notfound, np.logical_not(self.cmask))
+        found = np.logical_not(self.notfound)
+
+        for fname_idx in np.where(newkeys)[0]:
             uid = self.currentSample[fname_idx]
             print("*** Fingerprints *** Found new uid", uid)
             key_idx = self.getKeyIdx(fname_idx)
@@ -137,7 +138,7 @@ class Fingerprints(Modeler.Modeler):
                 print("*** Fingerprints *** Learn new uid - free slot", key_idx)
                 self.featureValues[fname_idx][uid] = key_idx
                 self.currentIdx[fname_idx] = key_idx
-                self.notfound[fname_idx] = False
+                found[fname_idx] = True
 
                 val = {
                     "uid": uid
@@ -145,19 +146,19 @@ class Fingerprints(Modeler.Modeler):
                 }
                 self.storeItem(fname_idx, key_idx, val)
 
-        print("Fingerprints drift all")
+        #print("Fingerprints drift all")
 
-        found = np.logical_not(self.notfound)
+
         indexes = self.indexes[found]
         currentIdx = self.currentIdx[found]
-        print("currentSample found", indexes, currentIdx)
+        #print("currentSample found", indexes, currentIdx)
 
         self.my_c[indexes, currentIdx] += 1
 
         c = self.base_c + self.my_c
         self.mean = np.sum(c ** 2, axis=1) / self.n
         self.std = np.maximum(np.sqrt(np.sum(c ** 3, axis=1) / self.n - self.mean ** 2), np.ones(self.numFeatures))
-        print ("Fingerprints learn", c, self.mean, self.std)
+        #print ("Fingerprints learn", c, self.mean, self.std)
 
     def calc2(self, data):
         fprints = np.array(data, dtype=str)
@@ -196,7 +197,6 @@ class Fingerprints(Modeler.Modeler):
         #p = (self.model[self.indexes, self.currentSample]-mean)/std
         #print ("cdf of", self.model[self.indexes, self.currentSample]+1, (self.model[self.indexes, self.currentSample]+1 - self.mean)/self.std)
         #self.p = norm.cdf((self.model[self.indexes, self.currentSample]+1 - self.mean)/self.std)
-
         model = self.base[self.indexes, self.currentSample] + self.model[self.indexes, self.currentSample]+1
         self.p = -(model - self.mean)/self.std
         #self.p[self.n < self.minimumLearning] = 0

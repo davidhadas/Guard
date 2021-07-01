@@ -200,8 +200,8 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(r[0], 0.05, delta=0.05)
 
     def test_learnSingleton(self):
-        for x in [0]: #[1E-10, 0.1, 0, 10, 1E10, -1E-10, -0.1, -0, -10, -1E10, ]:
-            #print ("test_learnSingleton", x)
+        for x in [1E-10, 0.1, 0, 10, 1E10, -1E-10, -0.1, -0, -10, -1E10, ]:
+            print ("test_learnSingleton", x)
             m = Markers.Markers({
                 "markers": ["test"]
                 , "AllowLimit": 10
