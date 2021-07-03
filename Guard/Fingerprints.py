@@ -5,7 +5,7 @@ from Guard import Modeler
 
 class Fingerprints(Modeler.Modeler):
     name = "fingerprints"
-      = 4
+    maxConcepts  = 4
     def __init__(self, spec):
         super().__init__(spec)
 
