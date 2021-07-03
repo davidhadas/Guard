@@ -217,7 +217,6 @@ class Modeler:
         return p.tolist()
 
     def verbose(self):
-        return
         print("Verbose", self.name, self.p)
         for fname, p in zip(self.featureNames, self.p):
             if p>self.AllowLimit:
