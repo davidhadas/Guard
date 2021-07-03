@@ -5,7 +5,7 @@ from Guard import Modeler
 
 class Fingerprints(Modeler.Modeler):
     name = "fingerprints"
-    maxConcepts = 4
+      = 4
     def __init__(self, spec):
         super().__init__(spec)
 
@@ -123,7 +123,7 @@ class Fingerprints(Modeler.Modeler):
         p[notfound] = 100
         p[self.cmask] = 0
         self.p = p
-        #print ("fingerprints self.p", self.p, c, self.mean)
+        print ("fingerprints self.p", self.p, c, self.mean, self.std)
 
     def learn(self):
         super().learn()
