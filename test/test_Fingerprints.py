@@ -27,7 +27,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(r[0], 0)
             m.learn()
         delta = time.time() - startTime
-        self.assertLess(delta, 2)
+        self.assertLess(delta, 10)
 
         self.assertEqual(len(m.keys["test"]), 1)
         self.assertAlmostEqual(m.mean[0], 10000, delta=10)
