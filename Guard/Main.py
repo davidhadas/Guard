@@ -23,7 +23,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 def resetServiceGate(serviceid, gateid):
     print ("/resetServiceGate called")
     evaluator.resetServiceGate(serviceid, gateid)
-
+    return jsonify({"Reset": "OK"})
 
 @app.route('/display/')
 def display():

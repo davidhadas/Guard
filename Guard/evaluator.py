@@ -17,9 +17,10 @@ count = 0
 def resetServiceGate(serviceid, gateid):
     if serviceid not in controller.services or gateid not in controller.services[serviceid]:
         return {}
-    controller.deleteGuardian(gateId, serviceId)
-    controller.services[serviceId][gateId] = []
-    print("controller deletedGuardian", serviceid, gateId, flush=True)
+    controller.deleteGuardian(gateid, serviceid)
+    controller.services[serviceid][gateid] = []
+    print("controller deletedGuardian", serviceid, gateid, flush=True)
+
 
 def display():
     return list(controller.services.keys())
