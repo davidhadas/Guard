@@ -123,7 +123,7 @@ class Fingerprints(Modeler.Modeler):
         p[notfound] = 100
         p[self.cmask] = 0
         self.p = p
-        print ("fingerprints self.p", self.p, c, self.mean, self.std)
+        #print ("fingerprints self.p", self.p, c, self.mean, self.std)
 
     def learn(self):
         super().learn()
@@ -200,7 +200,7 @@ class Fingerprints(Modeler.Modeler):
         #print ("cdf of", self.model[self.indexes, self.currentSample]+1, (self.model[self.indexes, self.currentSample]+1 - self.mean)/self.std)
         #self.p = norm.cdf((self.model[self.indexes, self.currentSample]+1 - self.mean)/self.std)
         model = self.base[self.indexes, self.currentSample] + self.model[self.indexes, self.currentSample]+1
-        self.p = -(model - self.mean)/self.std
+        #self.p = -(model - self.mean)/self.std
         #self.p[self.n < self.minimumLearning] = 0
 
 
