@@ -13,6 +13,14 @@ from Guard import controller
 # globalData = threading.local()
 count = 0
 
+
+def resetServiceGate(serviceid, gateid):
+    if serviceid not in controller.services or gateid not in controller.services[serviceid]:
+        return {}
+    controller.deleteGuardian(gateId, serviceId)
+    controller.services[serviceId][gateId] = []
+    print("controller deletedGuardian", serviceid, gateId, flush=True)
+
 def display():
     return list(controller.services.keys())
 

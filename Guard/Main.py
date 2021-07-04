@@ -18,12 +18,18 @@ app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 
+
+@app.route('/reset/<serviceid>/<gateid>')
+def resetServiceGate(serviceid, gateid):
+    print ("/resetServiceGate called")
+    evaluator.resetServiceGate(serviceid, gateid)
+
+
 @app.route('/display/')
 def display():
     print("/display called")
     d = evaluator.display()
     return jsonify(d)
-
 
 @app.route('/display/<serviceid>')
 def displayService(serviceid):

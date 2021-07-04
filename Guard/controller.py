@@ -45,7 +45,7 @@ def serve(serviceId, gateId):
 
     return gateSpec, services[serviceId][gateId]["modelers"]
 
-'''
+
 def deleteGuardian(gateId, serviceId):
     print("Now in deleteGuardian", gateId + "." + serviceId)
     try:
@@ -61,7 +61,7 @@ def deleteGuardian(gateId, serviceId):
         print("Guardian could not be deleted for", gateId+"."+serviceId, e)
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
-'''
+
 '''
 def getGuardian(gateId, serviceId):
     resource = {}
