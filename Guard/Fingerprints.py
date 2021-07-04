@@ -156,11 +156,11 @@ class Fingerprints(Modeler.Modeler):
         self.my_c[indexes, currentIdx] += 1
 
         c = self.base_c + self.my_c
-        n = np.sum(c, axis=1)[0]
+        n = np.sum(c, axis=1)
 
         self.mean = np.sum(c ** 2, axis=1) / n
         self.std = np.maximum(np.sqrt(np.sum(c ** 3, axis=1) / n - self.mean ** 2), np.ones(self.numFeatures))
-        print ("Fingerprints learn", c, n, np.sum(c ** 3, axis=1) / n - self.mean ** 2, self.std)
+        print ("Fingerprints learn", c, n, self.mean, np.sum(c ** 3, axis=1) / n - self.mean ** 2, self.std)
 
     def calc2(self, data):
         fprints = np.array(data, dtype=str)
