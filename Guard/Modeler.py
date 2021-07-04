@@ -54,7 +54,8 @@ class Modeler:
         #print("Reset", self.name, "numFeatures", self.numFeatures)
         self.p = np.zeros(self.numFeatures)
         self.cmask = [False for ii in range(self.numFeatures)]
-        self.n = 0
+        self.my_n = 0
+        self.base_n = 0
         self.status = {}
         self.keys = {}
         for fname in self.featureNames:
@@ -91,7 +92,7 @@ class Modeler:
             self.modelerReset()
             return
 
-        self.n = values
+        self.base_n = values
 
         for fname, values in mystatus.items():
             if (fname == "_n"):
@@ -178,8 +179,8 @@ class Modeler:
     def crdstore(self, status):
         #print("Storing", self.name)
         self.store()
-        self.status["_n"] = self.n
-
+        self.status["_n"] = self.base_n + self.my_n
+        self.my_n = 0
         status[self.name] = self.status
 
     def assess(self, data):
@@ -201,9 +202,9 @@ class Modeler:
         with np.errstate(invalid='raise', divide='raise'):
             try:
                 self.calc(data)
-                self.n += 1
+                self.my_n += 1
                 p = self.p
-                n = self.n
+                n = self.base_n, self.my_n
                 if (random.random() < 2*math.exp(-self.learningGama * n)):
                     #print("n", n)
                     p = np.zeros(self.numFeatures)
