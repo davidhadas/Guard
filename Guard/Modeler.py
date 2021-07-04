@@ -204,7 +204,7 @@ class Modeler:
                 self.calc(data)
                 self.my_n += 1
                 p = self.p
-                n = self.base_n, self.my_n
+                n = self.base_n + self.my_n
                 if (random.random() < 2*math.exp(-self.learningGama * n)):
                     #print("n", n)
                     p = np.zeros(self.numFeatures)
