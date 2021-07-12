@@ -4,6 +4,7 @@ import traceback
 import secrets
 import random
 import math
+import time
 # from scipy.stats import norm
 
 modelers = []
@@ -32,6 +33,7 @@ class Modeler:
         self.numExpandedFeatures = 0
         self.configFromGate(spec)
         self.modelerReset()
+
         #print("INIT self.numExpandedFeatures =", self.numExpandedFeatures)
 
     def configFromGate(self, spec):
@@ -40,7 +42,7 @@ class Modeler:
         self.LearnLimit = spec["LearnLimit"]
         self.AllowLimit = spec["AllowLimit"]
         self.minimumLearning = min(spec["minimumLearning"],100)
-        self.learningGama = -math.log(0.5)/self.minimumLearning
+
 
         if (hasattr(self, 'expandFeatures') and hasattr(self, 'expandData')):
             self.numExpandedFeatures = len(self.featureNames)
@@ -52,10 +54,12 @@ class Modeler:
 
     def modelerReset(self):
         #print("Reset", self.name, "numFeatures", self.numFeatures)
-        self.p = np.zeros(self.numFeatures)
-        self.cmask = [False for ii in range(self.numFeatures)]
         self.my_n = 0
         self.base_n = 0
+
+        self.p = np.zeros(self.numFeatures)
+        self.cmask = [False for ii in range(self.numFeatures)]
+        self.learnUntil = 0
         self.status = {}
         self.keys = {}
         for fname in self.featureNames:
@@ -83,24 +87,29 @@ class Modeler:
             self.modelerReset()
             return
 
-        if "_n" not in mystatus:
+        if "_n" not in status:
             self.modelerReset()
             return
 
-        values = mystatus["_n"]
+        values = status["_n"]
         if not isinstance(values, int):
             self.modelerReset()
             return
+        self.base_n = int(values)
 
-        self.base_n = values
+        if "_learnUntil" in status:
+            values = status["_learnUntil"]
+            if isinstance(values, float):
+                self.learnUntil = values
+                print("crdload learnUntil", self.learnUntil)
 
         for fname, values in mystatus.items():
-            if (fname == "_n"):
+            if (fname[0] == "_"): #only old _n for now
                 continue
             if fname not in self.featureNames:
                 continue
             fname_idx = self.featureNames.index(fname)
-            if (self.cmask[fname_idx]):
+            if self.cmask[fname_idx]:
                 continue
 
             # update existing concepts
@@ -179,9 +188,9 @@ class Modeler:
     def crdstore(self, status):
         #print("Storing", self.name)
         self.store()
-        self.status["_n"] = self.base_n + self.my_n
-        self.my_n = 0
         status[self.name] = self.status
+        status["_n"] = self.base_n + self.my_n
+        self.my_n = 0
 
     def assess(self, data):
         #print("ASSES self.numExpandedFeatures =", self.numExpandedFeatures)
@@ -201,21 +210,19 @@ class Modeler:
             raise
         with np.errstate(invalid='raise', divide='raise'):
             try:
-                self.calc(data)
                 self.my_n += 1
-                p = self.p
+                self.calc(data)
                 n = self.base_n + self.my_n
-                if (random.random() < 2*math.exp(-self.learningGama * n)):
-                    #print("n", n)
-                    p = np.zeros(self.numFeatures)
-                p[self.cmask] = 0
+                if self.minimumLearning > n or self.learnUntil > time.time():
+                    self.p = np.zeros(self.numFeatures)
+
+                self.p[self.cmask] = 0
             except:
                 print(self.name, "Calc except during assess")
                 traceback.print_exc(file=sys.stdout)
-                p = np.zeros(self.numFeatures)
-                self.p = p
+                self.p = np.zeros(self.numFeatures)
 
-        return p.tolist()
+        return self.p.tolist()
 
     def verbose(self):
         print("Verbose", self.name, self.p)
