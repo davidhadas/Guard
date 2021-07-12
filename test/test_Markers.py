@@ -192,10 +192,10 @@ class MyTestCase(unittest.TestCase):
             #print(i,r)
             self.assertAlmostEqual(r[0], 0.05, delta=0.05)
             m.learn()
+
         r = m.assess({'markers': [2]})
         self.assertNotAlmostEqual(r[0], 1, delta=1)
         m.learn()
-
         r = m.assess({'markers': [5]})
         self.assertAlmostEqual(r[0], 0.05, delta=0.05)
 
