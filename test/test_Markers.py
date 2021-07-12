@@ -193,12 +193,25 @@ class MyTestCase(unittest.TestCase):
             self.assertAlmostEqual(r[0], 0.05, delta=0.05)
             m.learn()
         r = m.assess({'markers': [2]})
-
         self.assertNotAlmostEqual(r[0], 1, delta=1)
         m.learn()
 
         r = m.assess({'markers': [5]})
         self.assertAlmostEqual(r[0], 0.05, delta=0.05)
+
+        status = {}
+        m.crdstore(status)
+        status["_learnUntil"] = time.time() + 60000
+        m.crdload(status)
+        r = m.assess({'markers': [2]})
+        self.assertAlmostEqual(r[0], 0.05, delta=0.05)
+
+        status = {}
+        m.crdstore(status)
+        status["_learnUntil"] = time.time() - 60000
+        m.crdload(status)
+        r = m.assess({'markers': [2]})
+        self.assertNotAlmostEqual(r[0], 1, delta=1)
 
     def test_learnSingleton(self):
         for x in [1E-10, 0.1, 0, 10, 1E10, -1E-10, -0.1, -0, -10, -1E10, ]:
@@ -212,7 +225,6 @@ class MyTestCase(unittest.TestCase):
             })
             for i in range(1000):
                 r = m.assess({'markers': [x]})
-                #print(x, r)
                 self.assertLess(r[0], 2)
                 m.learn()
 
