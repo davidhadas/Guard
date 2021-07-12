@@ -135,8 +135,9 @@ class Markers(Modeler.Modeler):
         #print ("markers self.p", self.p, sarray,  self.mean, np.absolute(sarray - self.mean), self.sdev, self.z)
 
     def learn(self):
+        #print ("learn",self.p)
         for fname_idx in np.where(self.p >= self.threeStdQuantile)[0]:
-
+            #print("*** Markers *** Learn ", fname_idx, self.p[fname_idx], self.g[fname_idx])
             self.p[fname_idx] = self.threeStdQuantile
             g = self.g[fname_idx]
             if (g.addPoint(self.currentSample[fname_idx][0]) > 100):

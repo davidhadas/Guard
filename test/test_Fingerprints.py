@@ -166,13 +166,15 @@ class MyTestCase(unittest.TestCase):
             m.learn()
         status = {}
         m.crdstore(status)
-        #print(status)
+        print(status)
+
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 6000)
 
         self.assertTrue("fingerprints" in status)
         values = status["fingerprints"]
         self.assertTrue(isinstance(values, dict))
-        self.assertTrue("_n" in values)
-        self.assertEqual(values["_n"], 6000)
+
 
         self.assertTrue("test" in values)
         val = values["test"]
@@ -220,8 +222,8 @@ class MyTestCase(unittest.TestCase):
                     'test': {key0: {'uid': 'A1', 'c': 1000000},
                              key1: {'uid': 'B1', 'c': 2000000},
                              key2: {'uid': 'C1', 'c': 3000000},
-                             'dddddddddddddddd': {'uid': 'DD', 'c': 1000000}},
-                    '_n': 5000000}}
+                             'dddddddddddddddd': {'uid': 'DD', 'c': 1000000}}},
+                    '_n': 5000000}
 
         #print("Loading...")
         m.crdload(status)
@@ -236,16 +238,16 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(isinstance(val, dict))
         keys = list(val.keys())
         #print(keys, values)
-        self.assertEqual(len(keys), 2)
+        self.assertEqual(len(keys), 1)
 
-        self.assertTrue("_n" in val)
+        self.assertTrue("_n" in status)
 #        self.assertEqual(val["_n"], 5006000)
 
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
         keys = list(values.keys())
-        #print(keys, values)
+        print(val, keys, values)
         self.assertEqual(len(keys), 4)
 
         # previous keys
@@ -281,7 +283,7 @@ class MyTestCase(unittest.TestCase):
             , "collectorId": "mygate"
             , "minimumLearning": 100
         })
-        status = {'fingerprints': {
+        status = {'_n': 5000000, 'fingerprints': {
             'test': {'borke1': 11,
                      'broke2': [2, 3],
                      'broke3': {},
@@ -290,8 +292,8 @@ class MyTestCase(unittest.TestCase):
                      'broke6': {"c": 22, "uid": 33},
                      'broke7': {"c": "22", "uid": "33"},
                      'broke8': {"c": [], "uid": "aa"},
-                     'broke9': {"c": {33}, "uid": {}}},
-            '_n': 5000000}}
+                     'broke9': {"c": {33}, "uid": {}}}
+            }}
 
         # print("Loading...")
         m.crdload(status)
@@ -306,9 +308,9 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(isinstance(val, dict))
         keys = list(val.keys())
         #print(keys, values)
-        self.assertEqual(len(keys), 2)
+        self.assertEqual(len(keys), 1)
 
-        self.assertTrue("_n" in val)
+        self.assertTrue("_n" in status)
         #        self.assertEqual(val["_n"], 5006000)
 
         self.assertTrue("test" in val)
@@ -336,8 +338,8 @@ class MyTestCase(unittest.TestCase):
                      'add7': {"c": 22, "uid": "xx"},
                      'add8': {"c": 22, "uid": "xx"},
                      'add9': {"c": 22, "uid": "xx"},
-                     },
-            '_n': 5000000}}
+                     }},
+            '_n': 5000000}
 
         # print("Loading...")
         m.crdload(status)
@@ -352,9 +354,9 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(isinstance(val, dict))
         keys = list(val.keys())
         #print(keys, values)
-        self.assertEqual(len(keys), 2)
+        self.assertEqual(len(keys), 1)
 
-        self.assertTrue("_n" in val)
+        self.assertTrue("_n" in status)
         #        self.assertEqual(val["_n"], 5006000)
 
         self.assertTrue("test" in val)

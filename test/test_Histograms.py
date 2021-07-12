@@ -63,11 +63,12 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print(status)
 
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 1000)
+
         self.assertTrue("histograms" in status)
         values = status["histograms"]
         self.assertTrue(isinstance(values, dict))
-        self.assertTrue("_n" in values)
-        self.assertEqual(values["_n"], 1000)
 
         self.assertTrue("test-01" in values)
         val = values["test-01"]

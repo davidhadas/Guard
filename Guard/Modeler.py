@@ -41,7 +41,7 @@ class Modeler:
         self.featureNames = spec[self.name]
         self.LearnLimit = spec["LearnLimit"]
         self.AllowLimit = spec["AllowLimit"]
-        self.minimumLearning = min(spec["minimumLearning"],100)
+        self.minimumLearning = max(spec["minimumLearning"],150)
 
 
         if (hasattr(self, 'expandFeatures') and hasattr(self, 'expandData')):
@@ -53,7 +53,7 @@ class Modeler:
         #print("FROMGATE self.numExpandedFeatures =", self.numExpandedFeatures)
 
     def modelerReset(self):
-        #print("Reset", self.name, "numFeatures", self.numFeatures)
+        print("Reset", self.name, "numFeatures", self.numFeatures)
         self.my_n = 0
         self.base_n = 0
         self.p = np.zeros(self.numFeatures)
@@ -211,17 +211,15 @@ class Modeler:
             try:
                 self.my_n += 1
                 self.calc(data)
-                n = self.base_n + self.my_n
-                if self.minimumLearning > n or self.learnUntil > time.time():
-                    self.p = np.zeros(self.numFeatures)
-
                 self.p[self.cmask] = 0
+                n = self.base_n + self.my_n
+                if self.minimumLearning < n and self.learnUntil < time.time():
+                    return self.p.tolist()
             except:
                 print(self.name, "Calc except during assess")
                 traceback.print_exc(file=sys.stdout)
-                self.p = np.zeros(self.numFeatures)
 
-        return self.p.tolist()
+        return np.zeros(self.numFeatures).tolist()
 
     def verbose(self):
         print("Verbose", self.name, self.p)

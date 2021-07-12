@@ -185,10 +185,11 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         for i in range(1000):
             r = m.assess({'markers': [5]})
+            #print(i,r)
             self.assertAlmostEqual(r[0], 0.05, delta=0.05)
             m.learn()
         r = m.assess({'markers': [2]})
@@ -235,11 +236,12 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print(status)
 
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 1000)
+
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val,dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"],1000)
         self.assertTrue("test" in val)
         val = val["test"]
         self.assertTrue(isinstance(val, dict))
@@ -255,7 +257,7 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(val["s"], 5000, places=1)
         self.assertAlmostEqual(val["s2"], 25000, places=1)
 
-        status = {"markers": {  "_n": 555, "test": {
+        status = {"_n": 555, "markers": {   "test": {
                       key: {"c": 555, "s": 555, "s2": 555}
                     , "a": {"c": 666, "s": 6660, "s2": 666}
                     , "b": 666
@@ -278,8 +280,8 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"], 555)
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 555)
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
@@ -316,11 +318,12 @@ class MyTestCase(unittest.TestCase):
         status = {}
         m.crdstore(status)
         #print("status", status)
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 0)
+
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"], 0)
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
@@ -328,7 +331,7 @@ class MyTestCase(unittest.TestCase):
         #print(keys, values)
         self.assertEqual(len(keys), 0)
         #print ("-----")
-        status = {"markers": {"_n": 555, "test": {
+        status = {"_n": 555, "markers": {"test": {
               "x": {"c": 100, "s": 100, "s2": 100}
             , "a": {"c": 100, "s": 200, "s2": 1000}
             , "b": 666
@@ -347,11 +350,12 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print("Storing...", status)
 
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 555)
+
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"], 555)
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
@@ -385,11 +389,12 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print(status)
 
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 1000)
+
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val,dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"],1000)
         self.assertTrue("test" in val)
         val = val["test"]
         self.assertTrue(isinstance(val, dict))
@@ -405,7 +410,7 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(val["s"], 5000, places=1)
         self.assertAlmostEqual(val["s2"], 25000, places=1)
 
-        status = {"markers": {  "_n": 555, "test": {
+        status = {"_n": 555, "markers": {  "test": {
                       key: {"c": 555, "s": 555, "s2": 555}
                     , "tombstone": {}
                     , "a": {"c": 666, "s": 6660, "s2": 666}
@@ -429,8 +434,8 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"], 555)
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 555)
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
@@ -453,13 +458,13 @@ class MyTestCase(unittest.TestCase):
 
         m.maxConcepts = 2
 
-        status = {"markers": {
-               "_n": 555
-            ,  "test3": {
+        status = {"_n": 555
+            , "markers": {
+                 "test3": {
                       "a": {"c": 666, "s": 6660, "s2": 66}
                     , "c": {"c": 666, "s": 666, "s2": 66}
                     , "d": {"c": 666,  "s": -6660, "s2": 66}
-            }, "test2": {
+                }, "test2": {
                       "a": {"c": 666, "s": 6660, "s2": 66}
                     , "c": {"c": 666, "s": 666, "s2": 66}
         }}}
@@ -470,11 +475,12 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print("Storing...", status)
 
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 555)
+
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"], 555)
         self.assertTrue("test2" in val)
         self.assertTrue("test3" in val)
 

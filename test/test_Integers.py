@@ -45,11 +45,12 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print(status)
 
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 1000)
+
         self.assertTrue("integers" in status)
         val = status["integers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in val)
-        self.assertEqual(val["_n"], 1000)
         self.assertTrue("test" in val)
         val = val["test"]
         self.assertTrue(isinstance(val, dict))
