@@ -56,7 +56,6 @@ class Modeler:
         #print("Reset", self.name, "numFeatures", self.numFeatures)
         self.my_n = 0
         self.base_n = 0
-
         self.p = np.zeros(self.numFeatures)
         self.cmask = [False for ii in range(self.numFeatures)]
         self.learnUntil = 0
