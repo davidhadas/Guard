@@ -142,6 +142,60 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print(status)
 
+    def test_store_squeeze(self):
+        m = Fingerprints.Fingerprints({
+            "fingerprints": ["test"]
+            , "AllowLimit": 10
+            , "LearnLimit": 3
+            , "collectorId": "mygate"
+            , "minimumLearning": 100
+        })
+
+        status = {'fingerprints': {
+            'test': {"key0": {'uid': 'A1', 'c': 2000000},
+                     "key1": {'uid': 'B1', 'c': 2000}}},
+            '_n': 5000000}
+
+
+        # print("Loading...")
+        m.crdload(status)
+        status = {}
+        m.crdstore(status)
+        print (status)
+
+        self.assertTrue("fingerprints" in status)
+        val = status["fingerprints"]
+        self.assertTrue(isinstance(val, dict))
+        keys = list(val.keys())
+        # print(keys, values)
+        self.assertEqual(len(keys), 1)
+
+        self.assertTrue("_n" in status)
+        #        self.assertEqual(val["_n"], 5006000)
+
+        self.assertTrue("test" in val)
+        values = val["test"]
+        self.assertTrue(isinstance(values, dict))
+        keys = list(values.keys())
+        print(val, keys, values)
+        self.assertEqual(len(keys), 2)
+
+        # previous keys
+        val = values["key0"]
+        self.assertTrue(isinstance(val, dict))
+        self.assertTrue("c" in val)
+        self.assertTrue("uid" in val)
+        self.assertEqual(val["c"], 1000000)
+        self.assertEqual(val["uid"], "A1")
+        val = values["key1"]
+        self.assertTrue(isinstance(val, dict))
+        self.assertTrue("c" in val)
+        self.assertTrue("uid" in val)
+        self.assertEqual(val["c"], 2000)
+        self.assertEqual(val["uid"], "B1")
+
+
+
     def test_store_load(self):
         Fingerprints.maxConcepts = 8
         m = Fingerprints.Fingerprints({
@@ -151,7 +205,7 @@ class MyTestCase(unittest.TestCase):
             , "collectorId": "mygate"
             , "minimumLearning": 100
         })
-        for i in range(1000):
+        for i in range(100):
             r = m.assess({'fingerprints': ["A1"]})
             m.learn()
             r = m.assess({'fingerprints': ["A2"]})
@@ -169,7 +223,7 @@ class MyTestCase(unittest.TestCase):
         print(status)
 
         self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 6000)
+        self.assertEqual(status["_n"], 600)
 
         self.assertTrue("fingerprints" in status)
         values = status["fingerprints"]
@@ -186,25 +240,25 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
         self.assertTrue("uid" in val)
-        self.assertEqual(1000, val["c"])
+        self.assertEqual(100, val["c"])
         self.assertEqual("A1", val["uid"])
         key1 = keys[1]
         val = values["test"][key1]
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
         self.assertTrue("uid" in val)
-        self.assertEqual(2000, val["c"])
+        self.assertEqual(200, val["c"])
         self.assertEqual("A2", val["uid"])
         key2 = keys[2]
         val = values["test"][key2]
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
         self.assertTrue("uid" in val)
-        self.assertEqual(3000, val["c"])
+        self.assertEqual(300, val["c"])
         self.assertEqual("A3", val["uid"])
 
 
-        for i in range(1000):
+        for i in range(100):
             r = m.assess({'fingerprints': ["A1"]})
             m.learn()
             r = m.assess({'fingerprints': ["A2"]})
@@ -219,11 +273,11 @@ class MyTestCase(unittest.TestCase):
             m.learn()
 
         status = {'fingerprints': {
-                    'test': {key0: {'uid': 'A1', 'c': 1000000},
-                             key1: {'uid': 'B1', 'c': 2000000},
-                             key2: {'uid': 'C1', 'c': 3000000},
-                             'dddddddddddddddd': {'uid': 'DD', 'c': 1000000}}},
-                    '_n': 5000000}
+                    'test': {key0: {'uid': 'A1', 'c': 1000},
+                             key1: {'uid': 'B1', 'c': 2000},
+                             key2: {'uid': 'C1', 'c': 3000},
+                             'dddddddddddddddd': {'uid': 'DD', 'c': 1000}}},
+                    '_n': 5000}
 
         #print("Loading...")
         m.crdload(status)
@@ -231,7 +285,7 @@ class MyTestCase(unittest.TestCase):
         status = {}
         #print("Storing...", status)
         m.crdstore(status)
-        #print("Storing...", status)
+        print("Storing...", status)
 
         self.assertTrue("fingerprints" in status)
         val = status["fingerprints"]
@@ -255,25 +309,25 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
         self.assertTrue("uid" in val)
-        self.assertEqual(val["c"], 1001000)
+        self.assertEqual(val["c"], 1100)
         self.assertEqual(val["uid"], "A1")
         val = values[key1]
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
         self.assertTrue("uid" in val)
-        self.assertEqual(val["c"], 2002000)
+        self.assertEqual(val["c"], 2200)
         self.assertEqual(val["uid"], "B1")
         val = values[key2]
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
         self.assertTrue("uid" in val)
-        self.assertEqual(val["c"], 3003000)
+        self.assertEqual(val["c"], 3300)
         self.assertEqual(val["uid"], "C1")
         val = values["dddddddddddddddd"]
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
         self.assertTrue("uid" in val)
-        self.assertEqual(val["c"], 1000000)
+        self.assertEqual(val["c"], 1000)
         self.assertEqual(val["uid"], "DD")
 
         m = Fingerprints.Fingerprints({

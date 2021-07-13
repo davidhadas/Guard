@@ -28,6 +28,8 @@ class Fingerprints(Modeler.Modeler):
         print(c, uid, type(c), type(uid))
         if c<1:
             raise Modeler.CrdError("c", val["c"], "c must be 1 or more")
+        if (c>10000): # squeeze down
+            c /= 2
 
         self.featureValues[fname_idx][uid] = key_idx
         self.base_c[fname_idx, key_idx] = c
