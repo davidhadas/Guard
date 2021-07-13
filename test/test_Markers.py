@@ -232,6 +232,56 @@ class MyTestCase(unittest.TestCase):
             self.assertAlmostEqual(m.mean[0][0], x, delta=abs(x*0.01))
             self.assertAlmostEqual(m.sdev[0][0], 0.0, delta=0.01)
 
+
+    def test_store_squeeze(self):
+        m = Markers.Markers({
+            "markers": ["test"]
+            , "AllowLimit": 10
+            , "LearnLimit": 3
+            , "collectorId": "mygate"
+            , "minimumLearning": 100
+        })
+
+        status = {"_n": 777777777
+            , "markers": {
+                "test": {
+                      "a": {"c": 2222222, "s": 666666666, "s2": 88888888888}
+                    , "b": {"c": 100, "s": 100, "s2": 100}
+                }}}
+        # print("Loading...")
+        m.crdload(status)
+        status = {}
+        m.crdstore(status)
+
+        self.assertTrue("_n" in status)
+        self.assertEqual(status["_n"], 777777777)
+
+        self.assertTrue("markers" in status)
+        val = status["markers"]
+        self.assertTrue(isinstance(val,dict))
+        self.assertTrue("test" in val)
+        values = val["test"]
+        self.assertTrue(isinstance(values, dict))
+        keys = list(values.keys())
+        self.assertEqual(len(keys), 2)
+        val = values['a']
+        self.assertTrue(isinstance(val, dict))
+        self.assertTrue("c" in val)
+        self.assertTrue("s" in val)
+        self.assertTrue("s2" in val)
+        self.assertEqual(val["c"], 1111111)
+        self.assertAlmostEqual(val["s"], 333333333, places=1)
+        self.assertAlmostEqual(val["s2"], 44444444444, places=1)
+        val = values['b']
+        self.assertTrue(isinstance(val, dict))
+        self.assertTrue("c" in val)
+        self.assertTrue("s" in val)
+        self.assertTrue("s2" in val)
+        self.assertEqual(val["c"], 100)
+        self.assertAlmostEqual(val["s"], 100, places=1)
+        self.assertAlmostEqual(val["s2"], 100, places=1)
+
+
     def test_store_load(self):
         m = Markers.Markers({
             "markers": ["test"]

@@ -56,8 +56,14 @@ class Markers(Modeler.Modeler):
         if c<1:
             raise Modeler.CrdError("c", val["c"], "c must be 1 or more")
 
-        self.base_c[fname_idx, key_idx]  = c
-        self.base_s[fname_idx, key_idx]  = s
+        # Squeeze down - TBD if 10,000 is the right place to squeeze
+        if c > 10000:
+            c /= 2
+            s /= 2
+            s2 /= 2
+
+        self.base_c[fname_idx, key_idx] = c
+        self.base_s[fname_idx, key_idx] = s
         self.base_s2[fname_idx, key_idx] = s2
 
         c  += self.my_c[fname_idx, key_idx]
@@ -65,6 +71,9 @@ class Markers(Modeler.Modeler):
         s2 += self.my_s2[fname_idx, key_idx]
         m = s / c
         sdev = math.sqrt(max(s2 / c - m ** 2, np.finfo(np.float64).eps))
+
+
+
 
         #self.c[fname_idx, key_idx] = c
         self.mean[fname_idx, key_idx] = m
@@ -78,7 +87,6 @@ class Markers(Modeler.Modeler):
         self.base_c += self.my_c
         self.base_s += self.my_s
         self.base_s2 += self.my_s2
-
 
         for fname_idx in range(self.numFeatures):
             for key_idx in range(self.maxConcepts):
@@ -182,49 +190,6 @@ class Markers(Modeler.Modeler):
         return
         for idx, name in enumerate(self.featureNames):
             print("printCurrentFeatures", name, self.mean[idx], self.sdev[idx], self.cmask[idx], len(self.g[idx].points), self.base_c[idx], self.base_s[idx], self.base_s2[idx])
-
-
-    def learn2(self):
-        super().learn()
-        for fname_idx in np.where(self.p >= self.threeStdQuantile)[0]:
-            self.p[fname_idx] = self.threeStdQuantile
-            samples = self.skippedSamples[fname_idx]
-            samples.append(self.currentSample[fname_idx][0])
-            c = len(samples)
-            #print("skip ", fname_idx, self.p[fname_idx], c)
-
-            if c > 100:
-                #print("*** Markers *** Learn MEAN and SDEV")
-                key_idx = self.getKeyIdx(fname_idx)
-                if key_idx is not None:
-                    #print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
-                    s = float(np.sum(samples))
-                    s2 = float(np.sum(np.square(samples)))
-                    m = s/c
-                    self.my_c[fname_idx][key_idx] = c
-                    self.my_s[fname_idx][key_idx] = s
-                    self.my_s2[fname_idx][key_idx] = s2
-
-                    #self.c[fname_idx][key_idx] = c
-                    self.mean[fname_idx][key_idx] = m
-                    self.sdev[fname_idx][key_idx] = max(np.sqrt(s2/c - np.square(m)), 1E-20)
-                    val = {
-                        "s2": s2
-                        , "s": s
-                        , "c": c
-                    }
-                    self.storeItem(fname_idx, key_idx, val)
-                    self.printCurrentFeatures()
-
-                #print("*** Markers *** Learn MEAN and SDEV - clear")
-                self.skippedSamples[fname_idx] = []
-
-        indexs = (self.z == np.tile(self.p, (self.maxConcepts, 1)).T)
-        #print("drift all ", indexs)
-        s = self.currentSample[indexs]
-        self.my_c[indexs] += 1
-        self.my_s[indexs] += s
-        self.my_s2[indexs] += np.square(s)
 
 
 Modeler.modelers.append(Markers)

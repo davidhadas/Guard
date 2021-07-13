@@ -11,7 +11,7 @@ spec:
     listKind: GuardianList
   scope: Namespaced
   versions:
-    - name: v1beta1
+    - name: v1
       served: true
       storage: true
       schema:
@@ -20,8 +20,13 @@ spec:
           properties:
             spec:
               type: object
+              x-kubernetes-preserve-unknown-fields: true
               properties:
                 gateId:
                   type: string
                 serviceId:
                   type: string
+
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true

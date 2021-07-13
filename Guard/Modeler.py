@@ -186,9 +186,10 @@ class Modeler:
 
     def crdstore(self, status):
         #print("Storing", self.name)
+        n = self.base_n + self.my_n
         self.store()
         status[self.name] = self.status
-        status["_n"] = self.base_n + self.my_n
+        status["_n"] = n
         self.my_n = 0
 
     def assess(self, data):
