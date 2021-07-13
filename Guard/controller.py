@@ -51,7 +51,7 @@ def deleteGuardian(gateId, serviceId):
     try:
         api.delete_namespaced_custom_object(
             group="ibmresearch.com",
-            version="v1beta1",
+            version="v1",
             namespace="knative-guardian",
             name=gateId+"."+serviceId,
             plural="guardians"
@@ -70,7 +70,7 @@ def getGuardian(gateId, serviceId):
 
         resource = api.get_namespaced_custom_object(
             group="ibmresearch.com",
-            version="v1beta1",
+            version="v1",
             name=gateId+"."+serviceId,
             namespace="knative-guardian",
             plural="guardians",
@@ -91,7 +91,7 @@ def getGuardian(gateId, serviceId):
 def createGuardian(gateId, serviceId):
     # custom resource defined as dict
     guardian = {
-        "apiVersion": "ibmresearch.com/v1beta1",
+        "apiVersion": "ibmresearch.com/v1",
         "kind": "Guardians",
         "metadata": {
             "name": gateId + "." + serviceId
@@ -106,7 +106,7 @@ def createGuardian(gateId, serviceId):
 
         api_response = api.create_namespaced_custom_object(
             group="ibmresearch.com",
-            version="v1beta1",
+            version="v1",
             namespace="knative-guardian",
             plural="guardians",
             body= guardian
@@ -126,7 +126,7 @@ def patchGuardian(gateId, serviceId, status):
         print ("patchGuardian", gateId, serviceId, status)
         api.patch_namespaced_custom_object(
             group="ibmresearch.com",
-            version="v1beta1",
+            version="v1",
             name=gateId+"."+serviceId,
             namespace="knative-guardian",
             plural="guardians",
@@ -146,7 +146,7 @@ def getGate(gateId):
 
         resource = api.get_namespaced_custom_object(
             group="ibmresearch.com",
-            version="v1beta1",
+            version="v1",
             name=gateId,
             namespace="knative-guardian",
             plural="gates"
@@ -177,7 +177,7 @@ def watchGuardians():
             print('--> Starting stream of Guardians with resourceVersion', resourceVersion, flush=True)
             stream = w.stream(api.list_namespaced_custom_object,
                                   group="ibmresearch.com",
-                                  version="v1beta1",
+                                  version="v1",
                                   namespace="knative-guardian",
                                   plural="guardians",
                                   timeout_seconds=random.randint(50, 60),
@@ -284,7 +284,7 @@ def watchGates():
     try:
         response = api.list_namespaced_custom_object(
             group="ibmresearch.com",
-            version="v1beta1",
+            version="v1",
             namespace="knative-guardian",
             plural="gates")
 
@@ -332,7 +332,7 @@ def watchGates():
             start = time.time()
             stream = w.stream(api.list_namespaced_custom_object,
                      group="ibmresearch.com",
-                     version="v1beta1",
+                     version="v1",
                      namespace="knative-guardian",
                      plural="gates",
                      resource_version=resourceVersion
