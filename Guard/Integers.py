@@ -4,7 +4,7 @@ import sys
 
 class Integers(Markers.Markers):
     name = "integers"
-
+    minSdev2 = 0.0625
     def __init__(self, spec):
         super().__init__(spec)
 

@@ -5,6 +5,7 @@ import sys
 class Histograms(Markers.Markers):
     name = "histograms"
     histLen = 8
+    minSdev = 0.0625
 
     def expandFeatures(self, featureNames):
         fn = []

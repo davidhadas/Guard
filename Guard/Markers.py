@@ -12,6 +12,7 @@ from Guard import gvu
 class Markers(Modeler.Modeler):
     name = "markers"
     maxConcepts = 4
+    minSdev2 = 1E-20
     adjusted3Stddevs = [3.0009015323972648, 3.4399251966400537, 3.762361686930365, 4.031940947451361, 4.267351452930073,
                         4.479967979795997, 4.674375684341177, 4.8561403436466595, 5.025745559845473, 5.186364038411227,
                         5.339664503813593, 5.486382701563869, 5.627180177961487, 5.763642812678808, 5.893025139475057,
@@ -58,9 +59,12 @@ class Markers(Modeler.Modeler):
 
         # Squeeze down - TBD if 10,000 is the right place to squeeze
         if c > 10000:
+            print ("Squeeze down", self.featureNames[fname_idx], c,s,s2)
             c /= 2
             s /= 2
             s2 /= 2
+
+        s2 = max(s2, self.minSdev2 * c + (s **2 ) / c )
 
         self.base_c[fname_idx, key_idx] = c
         self.base_s[fname_idx, key_idx] = s
@@ -69,17 +73,14 @@ class Markers(Modeler.Modeler):
         c  += self.my_c[fname_idx, key_idx]
         s  += self.my_s[fname_idx, key_idx]
         s2 += self.my_s2[fname_idx, key_idx]
+
         m = s / c
-        sdev = math.sqrt(max(s2 / c - m ** 2, np.finfo(np.float64).eps))
-
-
-
+        sdev = math.sqrt(max(s2 / c - m ** 2, self.minSdev2))
 
         #self.c[fname_idx, key_idx] = c
         self.mean[fname_idx, key_idx] = m
-        self.sdev[fname_idx, key_idx] = max(sdev, 1E-10)
+        self.sdev[fname_idx, key_idx] = sdev
         self.printCurrentFeatures()
-
 
     def store(self):
         #print("store starts with self.base_c + self.my_c", self.base_c,  self.my_c, self.base_c + self.my_c)
@@ -115,7 +116,7 @@ class Markers(Modeler.Modeler):
                         self.base_c[fname_idx, key_idx_other] = 0
 
                         m = s / c
-                        sdev = math.sqrt(max(s2 / c - m ** 2, 1E-20))
+                        sdev = math.sqrt(max(s2 / c - m ** 2, self.minSdev2))
                         self.mean[fname_idx, key_idx] = m
                         self.sdev[fname_idx, key_idx] = sdev
                         self.delKeyIdx(fname_idx, key_idx_other)
@@ -155,7 +156,7 @@ class Markers(Modeler.Modeler):
                     #print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
                     result = g.getGuassian()
                     mu = result["driftedGuassian"]["mu"]
-                    sdev = result["driftedGuassian"]["sdev"]
+                    sdev = max(result["driftedGuassian"]["sdev"], self.minSdev2)
                     c = result["driftedGuassian"]["c"]
                     s = mu*c
                     s2 = (sdev**2 + mu**2)*c
