@@ -29,7 +29,7 @@ class Fingerprints(Modeler.Modeler):
         if c<1:
             raise Modeler.CrdError("c", val["c"], "c must be 1 or more")
         if (c>10000): # squeeze down
-            print("Squeeze down", self.featureNames[fname_idx], c)
+            print("Squeeze down fingerprint", self.featureNames[fname_idx], c)
             c /= 2
 
         self.featureValues[fname_idx][uid] = key_idx
@@ -126,7 +126,7 @@ class Fingerprints(Modeler.Modeler):
         p[notfound] = 100
         p[self.cmask] = 0
         self.p = p
-        #print ("fingerprints self.p", self.p, c, self.mean, self.std)
+        print ("fingerprints calc", self.p, c, self.mean, self.std)
 
     def learn(self):
         super().learn()
