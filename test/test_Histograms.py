@@ -31,19 +31,19 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(m.mean[0][0], 2E10, delta=1E9)
         self.assertLess(m.sdev[0][0], 1E9)
         self.assertAlmostEqual(m.mean[1][0], 0.5, delta=0.05)
-        self.assertLess(m.sdev[1][0], 0.05)
+        self.assertLess(m.sdev[1][0], 0.1)
         self.assertAlmostEqual(m.mean[2][0], 1E-10, delta=1E11)
         self.assertLess(m.sdev[2][0], 1E11)
         self.assertAlmostEqual(m.mean[3][0], 2E10, delta=1E9)
         self.assertLess(m.sdev[3][0], 1E9)
         self.assertAlmostEqual(m.mean[4][0], 5E-11, delta=1E-9)
-        self.assertLess(m.sdev[4][0], 1E-9)
+        self.assertLess(m.sdev[4][0], 0.1)
         self.assertAlmostEqual(m.mean[5][0], 2E10, delta=1E9)
         self.assertLess(m.sdev[5][0], 1E9)
         self.assertAlmostEqual(m.mean[6][0], 1, delta=0.1)
         self.assertLess(m.sdev[6][0], 0.1)
         self.assertAlmostEqual(m.mean[7][0], 5E-11, delta=1E-9)
-        self.assertLess(m.sdev[7][0], 1E-9)
+        self.assertLess(m.sdev[7][0], 0.1)
 
 
     def test_store(self):
@@ -114,7 +114,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("s2" in val)
         self.assertAlmostEqual(1000, val["c"], delta=10)
         self.assertAlmostEqual(1E-7, val["s"] , delta=1E-8)
-        self.assertAlmostEqual(1E-10, val["s2"], delta=1E-6)
+        self.assertAlmostEqual(0.4, val["s2"], delta=0.1)
 
 
         self.assertTrue("test-34" in values)
@@ -146,7 +146,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("s2" in val)
         self.assertAlmostEqual(1000, val["c"], delta=10)
         self.assertAlmostEqual(5E-8, val["s"] , delta=1E-8)
-        self.assertAlmostEqual(3.5E-18, val["s2"], delta=1E-18)
+        self.assertAlmostEqual(0.4, val["s2"], delta=0.1)
 
 
     def test_load(self):
