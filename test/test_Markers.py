@@ -271,7 +271,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("s2" in val)
         self.assertEqual(val["c"], 1111111)
         self.assertAlmostEqual(val["s"], 333333333, places=1)
-        self.assertAlmostEqual(val["s2"], 44444444444, places=1)
+        self.assertAlmostEqual(val["s2"], 100000009800, places=1)
         val = values['b']
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("c" in val)
@@ -367,7 +367,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("s2" in val)
         self.assertEqual(val["c"], 666)
         self.assertAlmostEqual(val["s"], 6660, places=1)
-        self.assertAlmostEqual(val["s2"], 666, places=1)
+        self.assertAlmostEqual(val["s2"], 66600, places=1)
 
     def test_merge(self):
         m = Markers.Markers({
