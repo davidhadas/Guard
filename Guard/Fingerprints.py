@@ -82,7 +82,7 @@ class Fingerprints(Modeler.Modeler):
         p[notfound] = 100
         p[self.cmask] = 0
         self.p = p
-        print ("fingerprints calc", self.p, c, self.mean, self.std)
+        #print ("fingerprints calc", self.p, c, self.mean, self.std)
 
     def learn(self):
         super().learn()

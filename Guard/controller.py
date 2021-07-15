@@ -201,6 +201,9 @@ def watchGuardians():
 
                     serviceId = guardian["spec"]["serviceId"]
                     gateId = guardian["spec"]["gateId"]
+                    learnUntil = 0
+                    if ("learn_until" in guardian["spec"]):
+                        learnUntil = float(guardian["spec"]["learn_until"])
                     status = guardian["status"]
 
                     print("Guardian new object",num, gateId, serviceId, flush=True)
@@ -225,7 +228,7 @@ def watchGuardians():
                     if t == "MODIFIED" or t == "ADDED":
                         services[serviceId][gateId]["status"] = status
                         for m in services[serviceId][gateId]["modelers"]:
-                            m.crdload(status)
+                            m.crdload(status, learnUntil)
 
                     print("GGG... Guradian successfuly updated", num, guardianId, resourceVersion, flush=True)
                 except:

@@ -75,7 +75,7 @@ class Modeler:
         self.status[fname] = {"tombstone": {}}
 
 
-    def crdload(self, status):
+    def crdload(self, status, learnUntil):
         #print(" CRD Loading", self.name)
         if not self.name in status:
             self.modelerReset()
@@ -98,9 +98,9 @@ class Modeler:
 
         if "_learnUntil" in status:
             values = status["_learnUntil"]
-            if isinstance(values, float):
-                self.learnUntil = values
-                print("crdload learnUntil", self.learnUntil)
+
+        self.learnUntil = learnUntil
+
 
         for fname, values in mystatus.items():
             if (fname[0] == "_"): #only old _n for now

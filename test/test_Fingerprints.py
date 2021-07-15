@@ -31,7 +31,7 @@ class MyTestCase(unittest.TestCase):
 
         status = {}
         m.crdstore(status)
-        m.crdload(status)
+        m.crdload(status, 0)
 
         self.assertEqual(len(m.keys["test"]), 1)
         self.assertAlmostEqual(m.mean[0], 10000, delta=10)
@@ -67,7 +67,7 @@ class MyTestCase(unittest.TestCase):
 
         status = {}
         m.crdstore(status)
-        m.crdload(status)
+        m.crdload(status, 0)
 
         self.assertEqual(m.cmask[0], False)
         self.assertEqual(len(m.keys["test"]), 3)
@@ -142,7 +142,7 @@ class MyTestCase(unittest.TestCase):
 
         status = {}
         m.crdstore(status)
-        m.crdload(status)
+        m.crdload(status, 0)
 
         self.assertAlmostEqual(m.mean[0], 1500, delta=10)
         self.assertAlmostEqual(m.std[0], 500, delta=10)
@@ -171,7 +171,7 @@ class MyTestCase(unittest.TestCase):
 
 
         # print("Loading...")
-        m.crdload(status)
+        m.crdload(status, 0)
         status = {}
         m.crdstore(status)
         print (status)
@@ -293,7 +293,7 @@ class MyTestCase(unittest.TestCase):
                     '_n': 5000}
 
         #print("Loading...")
-        m.crdload(status)
+        m.crdload(status, 0)
 
         status = {}
         #print("Storing...", status)
@@ -363,7 +363,7 @@ class MyTestCase(unittest.TestCase):
             }}
 
         # print("Loading...")
-        m.crdload(status)
+        m.crdload(status, 0)
 
         status = {}
         # print("Storing...", status)
@@ -409,7 +409,7 @@ class MyTestCase(unittest.TestCase):
             '_n': 5000000}
 
         # print("Loading...")
-        m.crdload(status)
+        m.crdload(status, 0)
 
         status = {}
         # print("Storing...", status)
