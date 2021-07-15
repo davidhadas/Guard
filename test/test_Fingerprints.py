@@ -29,6 +29,10 @@ class MyTestCase(unittest.TestCase):
         delta = time.time() - startTime
         self.assertLess(delta, 10)
 
+        status = {}
+        m.crdstore(status)
+        m.crdload(status)
+
         self.assertEqual(len(m.keys["test"]), 1)
         self.assertAlmostEqual(m.mean[0], 10000, delta=10)
         self.assertLess(m.std[0], 2)
@@ -60,6 +64,11 @@ class MyTestCase(unittest.TestCase):
             m.learn()
 
         #print(m.mean)
+
+        status = {}
+        m.crdstore(status)
+        m.crdload(status)
+
         self.assertEqual(m.cmask[0], False)
         self.assertEqual(len(m.keys["test"]), 3)
         self.assertAlmostEqual(m.mean[0], 1500, delta=10)
@@ -130,6 +139,10 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(len(m.keys["test1"]), 3)
         self.assertEqual(len(m.keys["test2"]), 2)
         self.assertEqual(len(m.keys["test3"]), 1)
+
+        status = {}
+        m.crdstore(status)
+        m.crdload(status)
 
         self.assertAlmostEqual(m.mean[0], 1500, delta=10)
         self.assertAlmostEqual(m.std[0], 500, delta=10)

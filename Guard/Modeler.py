@@ -154,7 +154,7 @@ class Modeler:
                 except Exception as e:
                     self.delKeyIdx(fname_idx, key_idx)
                     print("ilegal value during new key in load", fname_idx, key_idx, val, e)
-
+        self.drift()
 
     def storeItem(self, fname_idx, key_idx, val):
         fname = self.featureNames[fname_idx]
@@ -248,6 +248,10 @@ class Modeler:
 
     def learn(self):  # (self, mask):
         # virtual function for a modeler to learn from sample
+        pass
+
+    def drift(self):
+        # virtual function for a modeler to drift concepts
         pass
 
     #def expandFeatures(self, featureNames):

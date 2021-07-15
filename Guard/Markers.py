@@ -74,12 +74,18 @@ class Markers(Modeler.Modeler):
         s  += self.my_s[fname_idx, key_idx]
         s2 += self.my_s2[fname_idx, key_idx]
 
+    def drift(self):
+        w = np.where(self.base_c>0)
+        c = self.base_c[w]
+        s = self.base_s[w]
+        s2 = self.base_s2[w]
+
         m = s / c
-        sdev = math.sqrt(max(s2 / c - m ** 2, self.minSdev2))
+        sdev = np.sqrt(np.maximum(s2 / c - np.square(m), self.minSdev2))
 
         #self.c[fname_idx, key_idx] = c
-        self.mean[fname_idx, key_idx] = m
-        self.sdev[fname_idx, key_idx] = sdev
+        self.mean[w] = m
+        self.sdev[w] = sdev
         self.printCurrentFeatures()
 
     def store(self):

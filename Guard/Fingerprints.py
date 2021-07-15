@@ -37,6 +37,12 @@ class Fingerprints(Modeler.Modeler):
         #c += self.my_c[fname_idx, key_idx]
         #self.c[fname_idx, key_idx] = c
 
+    def drift(self):
+        c = self.base_c
+        n = np.sum(c, axis=1)
+
+        self.mean = np.sum(c ** 2, axis=1) / n
+        self.std = np.maximum(np.sqrt(np.sum(c ** 3, axis=1) / n - self.mean ** 2), np.ones(self.numFeatures))
 
     def store(self):
         # print("store starts with self.base_c + self.my_c", self.base_c,  self.my_c, self.base_c + self.my_c)
@@ -54,56 +60,6 @@ class Fingerprints(Modeler.Modeler):
                 self.storeItem(fname_idx, key_idx, val)
 
         self.my_c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
-
-    def load2(self, mystatus):
-        for i in range(len(mystatus)):
-            for fv, m in mystatus[i].items():
-                try:
-                    if (fv == '*'):
-                        self.featureValues[i] = ['*']
-                        self.mask(i, "load2")
-                        self.model[i] = np.zeros(self.maxConcepts, dtype=int)
-                        self.base[i] = np.zeros(self.maxConcepts, dtype=int)
-                        self.base[i, 0] = sum(mystatus[i].values())
-                        break
-                    j = self.featureValues[i].index(fv)
-                    self.base[i, j] = int(m)
-                    #print("load feature", fv, int(m))
-                except:
-                    if (self.maxConcepts > len(self.featureValues[i])):
-                        j = len(self.featureValues[i])
-                        self.featureValues[i].append(fv)
-                        self.base[i, j] = int(m)
-                    else:
-                        self.featureValues[i] = ['*']
-                        self.mask(i, "during load2")
-                        self.model[i] = np.zeros(self.maxConcepts, dtype=int)
-                        self.base[i] = np.zeros(self.maxConcepts, dtype=int)
-                        self.model[i, 0] = self.n
-                        self.base[i, 0] = sum(mystatus[i].values())
-                        break
-
-        self.n = np.sum(self.model + self.base, axis=1)[0]
-
-        model = self.base + self.model
-
-        self.mean = np.sum(model ** 2, axis=1) / self.n
-        self.std = np.maximum(np.sqrt(np.sum(model ** 3, axis=1) / self.n - self.mean ** 2), np.ones(self.numFeatures))
-
-
-
-    def store2(self, response):
-        status = []
-        self.base = self.base + self.model
-        self.model = np.zeros([self.numFeatures, self.maxConcepts], dtype=int)
-
-        for i in range(len(self.featureValues)):
-            s = {}
-            for fv, m in zip(self.featureValues[i], self.base[i]):
-                s[str(fv)] = int(m)
-                if (fv == '*'):
-                    break
-            status.append(s)
 
     def calc(self, data):
         idxarray = np.zeros(self.numFeatures, dtype=int)
@@ -158,72 +114,7 @@ class Fingerprints(Modeler.Modeler):
 
         self.my_c[indexes, currentIdx] += 1
 
-        c = self.base_c + self.my_c
-        n = np.sum(c, axis=1)
-
-        self.mean = np.sum(c ** 2, axis=1) / n
-        self.std = np.maximum(np.sqrt(np.sum(c ** 3, axis=1) / n - self.mean ** 2), np.ones(self.numFeatures))
         #print (">> Fingerprints learn", c, n, self.mean, np.sum(c ** 3, axis=1) / n - self.mean ** 2, self.std)
-
-    def calc2(self, data):
-        fprints = np.array(data, dtype=str)
-        fprints[self.cmask] = '*'
-        print ("fprints", fprints)
-        featureValues = self.featureValues
-
-        for i in range(self.numFeatures):
-            value = fprints[i]
-            try:
-                self.currentSample[i] = featureValues[i].index(value)
-            except:
-                print("New fingerprint", i, " missing value", value, flush=True)
-                if (self.maxConcepts > len(featureValues[i])):
-                    self.currentSample[i] = len(featureValues[i])
-                    featureValues[i].append(value)
-                    print("New fingerprint", i, " is Now", len(featureValues[i]), " with value:", value)
-                else:
-                    featureValues[i] = ['*']
-                    print("Masking out fingerprint", i)
-                    self.mask(i, "during calc2")
-                    self.currentSample[i] = 0
-                    base_n = np.sum(self.base[i])
-                    n = np.sum(self.model[i])
-                    self.model[i] = np.zeros(self.maxConcepts, dtype=int)
-                    self.base[i] = np.zeros(self.maxConcepts, dtype=int)
-                    self.model[i, 0] = n
-                    self.base[i, 0] = base_n
-
-
-        #print (self.model)
-
-        #print(std)
-
-        #print(self.currentSample, self.model[self.indexes, self.currentSample], mean, std)
-        #p = (self.model[self.indexes, self.currentSample]-mean)/std
-        #print ("cdf of", self.model[self.indexes, self.currentSample]+1, (self.model[self.indexes, self.currentSample]+1 - self.mean)/self.std)
-        #self.p = norm.cdf((self.model[self.indexes, self.currentSample]+1 - self.mean)/self.std)
-        model = self.base[self.indexes, self.currentSample] + self.model[self.indexes, self.currentSample]+1
-        #self.p = -(model - self.mean)/self.std
-        #self.p[self.n < self.minimumLearning] = 0
-
-
-
-
-    def learn2(self):
-        return
-
-
-        indexes = self.indexes
-        currentSample = self.currentSample
-        print ("currentSample", currentSample)
-        self.model[indexes, currentSample] += 1
-
-        model = self.base + self.model
-        #self.n[indexes] += 1
-        self.n += 1
-        self.mean = np.sum(model ** 2, axis=1) / self.n
-        self.std = np.maximum(np.sqrt(np.sum(model ** 3, axis=1) / self.n - self.mean ** 2), np.ones(self.numFeatures))
-
 
 
 Modeler.modelers.append(Fingerprints)
