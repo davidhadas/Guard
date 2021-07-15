@@ -58,7 +58,6 @@ class Modeler:
         self.base_n = 0
         self.p = np.zeros(self.numFeatures)
         self.cmask = [False for ii in range(self.numFeatures)]
-        self.learnUntil = 0
         self.status = {}
         self.keys = {}
         for fname in self.featureNames:
@@ -75,7 +74,7 @@ class Modeler:
         self.status[fname] = {"tombstone": {}}
 
 
-    def crdload(self, status, learnUntil):
+    def crdload(self, status):
         #print(" CRD Loading", self.name)
         if not self.name in status:
             self.modelerReset()
@@ -95,11 +94,6 @@ class Modeler:
             self.modelerReset()
             return
         self.base_n = int(values)
-
-        if "_learnUntil" in status:
-            values = status["_learnUntil"]
-
-        self.learnUntil = learnUntil
 
 
         for fname, values in mystatus.items():
@@ -214,7 +208,7 @@ class Modeler:
                 self.calc(data)
                 self.p[self.cmask] = 0
                 n = self.base_n + self.my_n
-                if self.minimumLearning < n and self.learnUntil < time.time():
+                if self.minimumLearning < n:
                     return self.p.tolist()
             except:
                 print(self.name, "Calc except during assess")

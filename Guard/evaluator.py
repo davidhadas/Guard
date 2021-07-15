@@ -4,6 +4,7 @@ import numpy as np
 import os
 import sys
 import traceback
+import time
 
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -44,13 +45,18 @@ def evaluate(serviceId, gateId, triggerInstance, data):
     count += 1
     print("*** Evaluate:", serviceId, gateId, triggerInstance, flush=True)
 
-    gateSpec, modelers  = controller.serve(serviceId, gateId)
+    gateSpec, guardSpec  = controller.serve(serviceId, gateId)
+
 
     try:
         LearnLimit = float(gateSpec["LearnLimit"])
         AllowLimit = float(gateSpec["AllowLimit"])
         minimumLearning = int(gateSpec["minimumLearning"])
-
+        learnUntil = guardSpec["learnUntil"]
+        unblockUntil = guardSpec["unblockUntil"]
+        unlearnUntil = guardSpec["unlearnUntil"]
+        modelers = guardSpec["modelers"]
+        now = time.time()
     except:
         print("Gate is not proper - missing data", gateSpec)
         traceback.print_exc(file=sys.stdout)
@@ -64,32 +70,18 @@ def evaluate(serviceId, gateId, triggerInstance, data):
 
     print ("**********> Results: p =",p, serviceId, gateId)
 
-    if sum(i > LearnLimit for i in p) < 2:
+    if now > unlearnUntil and (now < learnUntil or sum(i > LearnLimit for i in p) < 2):
         print("Learning OK", serviceId, gateId)
         for m in modelers:
             m.learn()
     else:
         print("Learning NOK", serviceId, gateId)
 
-    if all(i <= AllowLimit for i in p):
+    if unblockUntil < time.time() or sum(i > AllowLimit for i in p) < 2:
         print("Allow OK", flush=True)
         return True
     else:
         print("Allow NOK", flush=True)
     return False
 
-
-'''
-register("c1", ["aa", "bb"])
-
-for i in range(20):
-    for i in range(100):
-        p = evaluate("s1", "c1", "myuuid", ["abc", "xx"])
-    for i in range(2):
-        p = evaluate("s1", "c1", "myuuid", ["abc1", "xx"])
-        print(p)
-for i in range(0):
-    p = evaluate("s1", "c1", "myuuid", ["abc1", "xx"])
-    print(p)
-'''
 

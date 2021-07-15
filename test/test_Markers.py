@@ -199,18 +199,6 @@ class MyTestCase(unittest.TestCase):
         r = m.assess({'markers': [5]})
         self.assertAlmostEqual(r[0], 0.05, delta=0.05)
 
-        status = {}
-        m.crdstore(status)
-        m.crdload(status, time.time() + 60000)
-        r = m.assess({'markers': [2]})
-        self.assertAlmostEqual(r[0], 0.05, delta=0.05)
-
-        status = {}
-        m.crdstore(status)
-        m.crdload(status, time.time() - 60000)
-        r = m.assess({'markers': [2]})
-        self.assertNotAlmostEqual(r[0], 1, delta=1)
-
     def test_learnSingleton(self):
         for x in [1E-10, 0.1, 0, 10, 1E10, -1E-10, -0.1, -0, -10, -1E10, ]:
             print ("test_learnSingleton", x)
@@ -247,7 +235,7 @@ class MyTestCase(unittest.TestCase):
                     , "b": {"c": 100, "s": 100, "s2": 100}
                 }}}
         # print("Loading...")
-        m.crdload(status, 0)
+        m.crdload(status)
         status = {}
         m.crdstore(status)
 
@@ -330,7 +318,7 @@ class MyTestCase(unittest.TestCase):
                     , "i": {"c": 666, "s": 666, "s2": "x"}
         }}}
         #print("Loading...")
-        m.crdload(status, 0)
+        m.crdload(status)
 
         status = {}
         #print("Storing...", status)
@@ -404,7 +392,7 @@ class MyTestCase(unittest.TestCase):
             , "i": {"c": 666, "s": 666, "s2": "x"}
         }}}
         #print("Loading...")
-        m.crdload(status, 0)
+        m.crdload(status)
 
         status = {}
         m.crdstore(status)
@@ -484,7 +472,7 @@ class MyTestCase(unittest.TestCase):
                     , "i": {"c": 666, "s": 666, "s2": "x"}
         }}}
         #print("Loading...")
-        m.crdload(status, 0)
+        m.crdload(status)
 
         status = {}
         #print("Storing...", status)
@@ -529,7 +517,7 @@ class MyTestCase(unittest.TestCase):
                     , "c": {"c": 666, "s": 666, "s2": 66}
         }}}
         #print("Loading...")
-        m.crdload(status, 0)
+        m.crdload(status)
 
         status = {}
         m.crdstore(status)

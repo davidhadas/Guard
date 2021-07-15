@@ -41,9 +41,13 @@ def serve(serviceId, gateId):
     if gateId not in services[serviceId]:
         print("Controller  - serving a new gate for service!!", serviceId, gateId)
         createGuardian(gateId, serviceId)
-        services[serviceId][gateId] = {"modelers": [m(gateSpec) for m in modelers], "status": {}}
+        services[serviceId][gateId] = {"modelers": [m(gateSpec) for m in modelers],
+                                       "status": {},
+                                       "learnUntil": 0,
+                                       "unblockUntil": 0,
+                                       "unlearnUntil": 0}
 
-    return gateSpec, services[serviceId][gateId]["modelers"]
+    return gateSpec, services[serviceId][gateId]
 
 
 def deleteGuardian(gateId, serviceId):
@@ -201,9 +205,12 @@ def watchGuardians():
 
                     serviceId = guardian["spec"]["serviceId"]
                     gateId = guardian["spec"]["gateId"]
-                    learnUntil = 0
                     if ("learn_until" in guardian["spec"]):
-                        learnUntil = float(guardian["spec"]["learn_until"])
+                        guardian["spec"]["serviceId"]["learnUntil"] = float(guardian["spec"]["learn_until"])
+                    if ("unlearn_until" in guardian["spec"]):
+                        guardian["spec"]["serviceId"]["unlearnUntil"] = float(guardian["spec"]["unlearn_until"])
+                    if ("unblock_until" in guardian["spec"]):
+                        guardian["spec"]["serviceId"]["unblockUntil"] = float(guardian["spec"]["unblock_until"])
                     status = guardian["status"]
 
                     print("Guardian new object",num, gateId, serviceId, flush=True)
@@ -221,25 +228,21 @@ def watchGuardians():
                         print("new Guardian found - initializing all modelers", serviceId, gateId, services[serviceId], flush=True)
                         services[serviceId][gateId] = {"modelers": [m(gate["spec"]) for m in modelers], "status": status}
 
-
                     if t == "DELETED":
                         status = {}
                         del services[serviceId][gateId]
                     if t == "MODIFIED" or t == "ADDED":
                         services[serviceId][gateId]["status"] = status
                         for m in services[serviceId][gateId]["modelers"]:
-                            m.crdload(status, learnUntil)
+                            m.crdload(status)
 
                     print("GGG... Guradian successfuly updated", num, guardianId, resourceVersion, flush=True)
                 except:
-
                     print("GGG... Guradian exception illegal object", num, guardianId, flush=True)
                     traceback.print_exc(file=sys.stdout)
                     print("---------Error-------", flush=True)
 
-
             print("Guardians - ended list_namespaced_custom_object watch stream", flush=True)
-
 
         except:
             e = sys.exc_info()[0]
