@@ -206,11 +206,11 @@ def watchGuardians():
                     serviceId = guardian["spec"]["serviceId"]
                     gateId = guardian["spec"]["gateId"]
                     if ("learn_until" in guardian["spec"]):
-                        guardian["spec"]["serviceId"]["learnUntil"] = float(guardian["spec"]["learn_until"])
+                        guardian["spec"]["learnUntil"] = float(guardian["spec"]["learn_until"])
                     if ("unlearn_until" in guardian["spec"]):
-                        guardian["spec"]["serviceId"]["unlearnUntil"] = float(guardian["spec"]["unlearn_until"])
+                        guardian["spec"]["unlearnUntil"] = float(guardian["spec"]["unlearn_until"])
                     if ("unblock_until" in guardian["spec"]):
-                        guardian["spec"]["serviceId"]["unblockUntil"] = float(guardian["spec"]["unblock_until"])
+                        guardian["spec"]["unblockUntil"] = float(guardian["spec"]["unblock_until"])
                     status = guardian["status"]
 
                     print("Guardian new object",num, gateId, serviceId, flush=True)
