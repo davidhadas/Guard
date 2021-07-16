@@ -226,8 +226,11 @@ def watchGuardians():
 
                     if gateId not in services[serviceId]:
                         print("new Guardian found - initializing all modelers", serviceId, gateId, services[serviceId], flush=True)
-                        services[serviceId][gateId] = {"modelers": [m(gate["spec"]) for m in modelers], "status": status}
-
+                        services[serviceId][gateId] =   {"modelers": [m(gateSpec) for m in modelers],
+                                                         "status": {},
+                                                         "learnUntil": 0,
+                                                         "unblockUntil": 0,
+                                                         "unlearnUntil": 0}
                     if t == "DELETED":
                         status = {}
                         del services[serviceId][gateId]
@@ -380,16 +383,7 @@ def watchGates():
                     '''
                     We cant delete Guardians as they may include user configs
                     for serviceId, service in services.items():
-                        print(serviceId, service, flush=True)
-                        if (gateId in service):
-                            print(gateId, flush=True)
-                            deleteGuardian(gateId, serviceId)
-                            print(gateId, "deletedGuardian", flush=True)
-                            services[serviceId][gateId] = []
-                            print(gateId, "deleted the modelers", flush=True)
                     '''
-
-
                 except:
                     print("Gate exception illegal object", gateId, resourceVersion, flush=True)
                     traceback.print_exc(file=sys.stdout)
