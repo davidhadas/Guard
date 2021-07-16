@@ -69,6 +69,7 @@ def evaluate(serviceId, gateId, triggerInstance, data):
         m.verbose()
 
     print ("**********> Results: p =",p, serviceId, gateId)
+    print("**********> LearnLimit", LearnLimit, "AllowLimit", AllowLimit)
 
     if now > unlearnUntil:
         if now < learnUntil:
@@ -84,7 +85,7 @@ def evaluate(serviceId, gateId, triggerInstance, data):
     else:
         print("Unlearning is activated until ", serviceId, gateId, unlearnUntil)
 
-    if unblockUntil < time.time():
+    if unblockUntil > time.time():
         print("Allow OK until", serviceId, gateId, unblockUntil, flush=True)
         return True
     elif sum(i > AllowLimit for i in p) < 2:
