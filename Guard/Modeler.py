@@ -41,7 +41,7 @@ class Modeler:
         self.featureNames = spec[self.name]
         self.LearnLimit = spec["LearnLimit"]
         self.AllowLimit = spec["AllowLimit"]
-        self.minimumLearning = max(spec["minimumLearning"],150)
+        #self.minimumLearning = max(spec["minimumLearning"],150)
 
 
         if (hasattr(self, 'expandFeatures') and hasattr(self, 'expandData')):
@@ -54,8 +54,8 @@ class Modeler:
 
     def modelerReset(self):
         print("Reset", self.name, "numFeatures", self.numFeatures)
-        self.my_n = 0
-        self.base_n = 0
+        #self.my_n = 0
+        #self.base_n = 0
         self.p = np.zeros(self.numFeatures)
         self.cmask = [False for ii in range(self.numFeatures)]
         self.status = {}
@@ -84,17 +84,6 @@ class Modeler:
         if not isinstance(mystatus, dict):
             self.modelerReset()
             return
-
-        if "_n" not in status:
-            self.modelerReset()
-            return
-
-        values = status["_n"]
-        if not isinstance(values, int):
-            self.modelerReset()
-            return
-        self.base_n = int(values)
-
 
         for fname, values in mystatus.items():
             if (fname[0] == "_"): #only old _n for now
@@ -180,11 +169,11 @@ class Modeler:
 
     def crdstore(self, status):
         #print("Storing", self.name)
-        n = self.base_n + self.my_n
+        #n = self.base_n + self.my_n
         self.store()
         status[self.name] = self.status
-        status["_n"] = n
-        self.my_n = 0
+        #status["_n"] = n
+        #self.my_n = 0
 
     def assess(self, data):
         #print("ASSES self.numExpandedFeatures =", self.numExpandedFeatures)
@@ -204,12 +193,12 @@ class Modeler:
             raise
         with np.errstate(invalid='raise', divide='raise'):
             try:
-                self.my_n += 1
+                #self.my_n += 1
                 self.calc(data)
                 self.p[self.cmask] = 0
-                n = self.base_n + self.my_n
-                if self.minimumLearning < n:
-                    return self.p.tolist()
+                #n = self.base_n + self.my_n
+                #if self.minimumLearning < n:
+                #    return self.p.tolist()
             except:
                 print(self.name, "Calc except during assess")
                 traceback.print_exc(file=sys.stdout)

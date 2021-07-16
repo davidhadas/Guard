@@ -45,7 +45,9 @@ def serve(serviceId, gateId):
                                        "status": {},
                                        "learnUntil": 0,
                                        "unblockUntil": 0,
-                                       "unlearnUntil": 0}
+                                       "unlearnUntil": 0,
+                                       "my_n": 0,
+                                       "base_n": 0}
 
     return gateSpec, services[serviceId][gateId]
 
@@ -233,12 +235,22 @@ def watchGuardians():
                                                          "status": {},
                                                          "learnUntil": 0,
                                                          "unblockUntil": 0,
-                                                         "unlearnUntil": 0}
+                                                         "unlearnUntil": 0,
+                                                         "my_n": 0,
+                                                         "base_n": 0}
                     if t == "DELETED":
                         status = {}
                         del services[serviceId][gateId]
                     if t == "MODIFIED" or t == "ADDED":
                         services[serviceId][gateId]["status"] = status
+                        if "_n" not in status:
+                            services[serviceId][gateId]["base_n"] = 0
+                        else:
+                            values = status["_n"]
+                            if not isinstance(values, int):
+                                services[serviceId][gateId]["base_n"] = 0
+                            else:
+                                services[serviceId][gateId]["base_n"] = int(values)
                         for m in services[serviceId][gateId]["modelers"]:
                             m.crdload(status)
 
@@ -270,7 +282,10 @@ def watchGuardians():
                 if len(gateIds):
                     gateId = random.choice(list(services[serviceId].keys()))
                     print("watchGuardians storing..", serviceId, gateId, services[serviceId][gateId])
-                    status = {}
+                    n = services[serviceId][gateId]["base_n"] + services[serviceId][gateId]["my_n"]
+                    services[serviceId][gateId]["my_n"] = 0
+
+                    status = {"_n": n}
                     for m in services[serviceId][gateId]["modelers"]:
                         m.crdstore(status)
                     status = {"status": status}

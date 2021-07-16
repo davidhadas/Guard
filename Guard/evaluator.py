@@ -62,28 +62,36 @@ def evaluate(serviceId, gateId, triggerInstance, data):
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
         return np.array([True])
-
+    n = guardSpec["my_n"] + 1
+    guardSpec["my_n"] = n
+    n += guardSpec["base_n"
     p = []
     for m in modelers:
         p += m.assess(data)
         m.verbose()
 
+    if
+        return self.p.tolist()
+
     print ("**********> Results: p =",p, serviceId, gateId)
     print("**********> LearnLimit", LearnLimit, "AllowLimit", AllowLimit)
 
-    if now > unlearnUntil:
-        if now < learnUntil:
-            print("Learning enforced until", serviceId, gateId, learnUntil)
-            for m in modelers:
-                m.learn()
-        elif sum(i > LearnLimit for i in p) < 2:
-            print("Learning OKed by Ensemble", serviceId, gateId)
-            for m in modelers:
-                m.learn()
+    if minimumLearning < n:
+        if now > unlearnUntil:
+            if now < learnUntil:
+                print("Learning enforced until", serviceId, gateId, learnUntil)
+                for m in modelers:
+                    m.learn()
+            elif sum(i > LearnLimit for i in p) < 2:
+                print("Learning OKed by Ensemble", serviceId, gateId)
+                for m in modelers:
+                    m.learn()
+            else:
+                print("Learning NOKed by Ensemble", serviceId, gateId)
         else:
-            print("Learning NOKed by Ensemble", serviceId, gateId)
+            print("Unlearning is activated until ", serviceId, gateId, unlearnUntil)
     else:
-        print("Unlearning is activated until ", serviceId, gateId, unlearnUntil)
+        print("minimumLearning not met", serviceId, gateId, minimumLearning, n)
 
     if unblockUntil > time.time():
         print("Allow OK until", serviceId, gateId, unblockUntil, flush=True)
