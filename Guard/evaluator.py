@@ -70,18 +70,28 @@ def evaluate(serviceId, gateId, triggerInstance, data):
 
     print ("**********> Results: p =",p, serviceId, gateId)
 
-    if now > unlearnUntil and (now < learnUntil or sum(i > LearnLimit for i in p) < 2):
-        print("Learning OK", serviceId, gateId)
-        for m in modelers:
-            m.learn()
+    if now > unlearnUntil:
+        if now < learnUntil:
+            print("Learning enforced until", serviceId, gateId, learnUntil)
+            for m in modelers:
+                m.learn()
+        elif sum(i > LearnLimit for i in p) < 2:
+            print("Learning OKed by Ensemble", serviceId, gateId)
+            for m in modelers:
+                m.learn()
+        else:
+            print("Learning NOKed by Ensemble", serviceId, gateId)
     else:
-        print("Learning NOK", serviceId, gateId)
+        print("Unlearning is activated until ", serviceId, gateId, unlearnUntil)
 
-    if unblockUntil < time.time() or sum(i > AllowLimit for i in p) < 2:
-        print("Allow OK", flush=True)
+    if unblockUntil < time.time():
+        print("Allow OK until", serviceId, gateId, unblockUntil, flush=True)
         return True
-    else:
-        print("Allow NOK", flush=True)
+    elif sum(i > AllowLimit for i in p) < 2:
+        print("Allow OK by ensemble", serviceId, gateId, flush=True)
+        return True
+
+    print("Allow NOK by ensemble", serviceId, gateId, flush=True)
     return False
 
 
