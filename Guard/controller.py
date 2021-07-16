@@ -215,7 +215,7 @@ def watchGuardians():
 
                     print("Guardian new object",num, gateId, serviceId, flush=True)
                     if (gateId in gates):
-                        gate = gates[gateId]
+                        gateSpec = gates[gateId]
                     else:
                         print("Guardian without Gate is ignored!", num, guardianId, flush=True)
                         continue
