@@ -39,6 +39,9 @@ def displayServiceGate(serviceid, gateid):
     return controller.services[serviceid][gateid]["status"]
 
 
+def configGuardian(serviceId, gateId, data):
+    controller.configGuardian(serviceId, gateId, data)
+
 def evaluate(serviceId, gateId, triggerInstance, data):
     # get the model for (serviceId, collectorId)
     global count
@@ -64,14 +67,11 @@ def evaluate(serviceId, gateId, triggerInstance, data):
         return np.array([True])
     n = guardSpec["my_n"] + 1
     guardSpec["my_n"] = n
-    n += guardSpec["base_n"
+    n += guardSpec["base_n"]
     p = []
     for m in modelers:
         p += m.assess(data)
         m.verbose()
-
-    if
-        return self.p.tolist()
 
     print ("**********> Results: p =",p, serviceId, gateId)
     print("**********> LearnLimit", LearnLimit, "AllowLimit", AllowLimit)
@@ -92,7 +92,6 @@ def evaluate(serviceId, gateId, triggerInstance, data):
             print("Unlearning is activated until ", serviceId, gateId, unlearnUntil)
     else:
         print("minimumLearning not met", serviceId, gateId, minimumLearning, n)
-
     if unblockUntil > time.time():
         print("Allow OK until", serviceId, gateId, unblockUntil, flush=True)
         return True

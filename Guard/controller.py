@@ -138,7 +138,38 @@ def patchGuardian(gateId, serviceId, status):
             plural="guardians",
             body=status
         )
-        print("Guardian patched", gateId+"."+serviceId)
+        print("Guardian patched", gateId+"."+serviceId, status)
+    except client.exceptions.ApiException as e:
+        print("Guardian not patched", gateId+"."+serviceId, e)
+        traceback.print_exc(file=sys.stdout)
+        print("---------Error-------", flush=True)
+        createGuardian(gateId, serviceId)
+
+def configGuardian(serviceId, gateId, data):
+    try:
+        now = time.time()
+        learnUntil = float(data["learnUntil"])*60*1000+now;
+        unlearnUntil = float(data["unlearnUntil"])*60*1000+now;
+        unblockUntil = float(data["unblockUntil"])*60*1000+now;
+
+        spec = { "spec": {"learnUntil": learnUntil,
+                          "unlearnUntil": unlearnUntil,
+                          "unblockUntil": unblockUntil
+                          }}
+
+        if 'api' in vars():
+            api.patch_namespaced_custom_object(
+                group="ibmresearch.com",
+                version="v1",
+                name=gateId+"."+serviceId,
+                namespace="knative-guardian",
+                plural="guardians",
+                body=spec
+            )
+            print("Guardian spec patched", gateId+"."+serviceId, spec)
+        else:
+            print("MIMIC: Guardian spec patched", gateId+"."+serviceId, spec)
+
     except client.exceptions.ApiException as e:
         print("Guardian not patched", gateId+"."+serviceId, e)
         traceback.print_exc(file=sys.stdout)
@@ -425,13 +456,14 @@ def watchGates():
 
 try:
     config.load_incluster_config()
+    # v1 = client.CoreV1Api()
+    api = client.CustomObjectsApi()
+
+    gateWatcher = threading.Thread(target=watchGates)
+    gateWatcher.start()
 except:
     print("config.load_incluster_config() exception")
-# v1 = client.CoreV1Api()
-api = client.CustomObjectsApi()
 
-gateWatcher = threading.Thread(target=watchGates)
-gateWatcher.start()
 
 
 '''

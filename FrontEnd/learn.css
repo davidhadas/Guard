@@ -1,0 +1,56 @@
+body {
+    color: #E0E1DD;
+    background-color: #0d1B2A
+}
+
+.selectsHeader {
+    width: 120px;
+}
+.configHeader {
+    width: 180px;
+}
+
+select {
+    color: #E0E1DD;
+    background-color: #1B263B;
+    padding: 4px;
+    margin: 4px;
+    width: 160px;
+}
+
+#SubmitLearning {
+    background-color: #E0E1DD;
+    color: #1B263B;
+    height: 18px;
+    width: 60px;
+    margin: auto;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+
+#ChooseInstance {
+    margin: 30px;
+}
+
+#learning {
+    border-color: #778Da9;
+    border-radius: 15px;
+    border-style: solid;
+    border-width: 3px;
+    padding: 20px;
+    width: 210px;
+    text-align: center;
+    margin: auto;
+
+}
+
+.timeUntil {
+    margin: auto;
+    padding: 10px;
+    border-bottom-style: solid;
+    border-color: #778Da9;
+    border-width: 1px;
+}
