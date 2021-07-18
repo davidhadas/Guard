@@ -157,19 +157,18 @@ def configGuardian(serviceId, gateId, data):
                           "unblockUntil": unblockUntil
                           }}
 
-        if 'api' in vars():
-            api.patch_namespaced_custom_object(
-                group="ibmresearch.com",
-                version="v1",
-                name=gateId+"."+serviceId,
-                namespace="knative-guardian",
-                plural="guardians",
-                body=spec
-            )
-            print("Guardian spec patched", gateId+"."+serviceId, spec)
-        else:
-            print("MIMIC: Guardian spec patched", gateId+"."+serviceId, spec)
 
+        api.patch_namespaced_custom_object(
+            group="ibmresearch.com",
+            version="v1",
+            name=gateId+"."+serviceId,
+            namespace="knative-guardian",
+            plural="guardians",
+            body=spec
+        )
+        print("Guardian spec patched", gateId+"."+serviceId, spec)
+    except NameError:
+        print("MIMIC: Guardian spec patched", gateId+"."+serviceId, spec)
     except client.exceptions.ApiException as e:
         print("Guardian not patched", gateId+"."+serviceId, e)
         traceback.print_exc(file=sys.stdout)
