@@ -15,7 +15,7 @@ def evaluate(serviceId, collectorId, triggerInstance, data):
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-staticDir = os.path.join(app.root_path, "..", "FrontEnd")
+staticDir = os.path.join(app.root_path, "FrontEnd")
 
 
 @app.route('/')
@@ -54,6 +54,7 @@ def displayServiceGate(serviceid, gateid):
         print("** /displayServiceGate POST", request.json)
         evaluator.configGuardian(serviceid, gateid, request.json)
         return ""
+
 
 @app.route('/reset/<serviceid>/<gateid>')
 def resetServiceGate(serviceid, gateid):
@@ -150,5 +151,6 @@ if __name__ == "__main__":
                 "base_n": 0}
         }
     }
+    staticDir = os.path.join(app.root_path, "..", "FrontEnd")
     app.run()
 
