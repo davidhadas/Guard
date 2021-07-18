@@ -13,10 +13,14 @@ body {
 select {
     color: #E0E1DD;
     background-color: #1B263B;
+    border-radius: 15px;
     padding: 4px;
     margin: 4px;
     width: 160px;
+    transition: .1s;
+    outline: none;
 }
+
 
 #SubmitLearning {
     background-color: #E0E1DD;

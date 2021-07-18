@@ -20,6 +20,7 @@ staticDir = os.path.join(app.root_path, "..", "FrontEnd")
 
 @app.route('/')
 def send_homepage():
+    print("** / called")
     return redirect('/web/index.html')
 
 @app.route('/web/<path:path>')
