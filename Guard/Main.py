@@ -15,7 +15,7 @@ def evaluate(serviceId, collectorId, triggerInstance, data):
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-staticDir = os.path.join(app.root_path, "FrontEnd")
+staticDir = os.path.join(app.root_path, "..", "FrontEnd")
 
 
 @app.route('/')
@@ -151,6 +151,5 @@ if __name__ == "__main__":
                 "base_n": 0}
         }
     }
-    staticDir = os.path.join(app.root_path, "..", "FrontEnd")
     app.run()
 
