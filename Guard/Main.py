@@ -23,10 +23,12 @@ def send_homepage():
     print("** / called")
     return redirect('/web/index.html')
 
+
 @app.route('/web/<path:path>')
 def send_web(path):
-    print("** /web/ called", , staticDir, path)
+    print("** /web/ called", staticDir, path)
     return send_from_directory(staticDir, path)
+
 
 @app.route('/data/', methods = ["GET"])
 def display():
