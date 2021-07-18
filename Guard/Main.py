@@ -25,7 +25,7 @@ def send_homepage():
 
 @app.route('/web/<path:path>')
 def send_web(path):
-    print("send_web", staticDir, path)
+    print("** /web/ called", , staticDir, path)
     return send_from_directory(staticDir, path)
 
 @app.route('/data/', methods = ["GET"])
