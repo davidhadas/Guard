@@ -19,7 +19,6 @@ def resetService(serviceid):
     if serviceid not in controller.services:
         return {}
     controller.deleteGuardian(serviceid)
-    controller.services[serviceid] = {}
     print("controller deletedGuardian", serviceid, flush=True)
 
 
@@ -48,8 +47,7 @@ def evaluate(serviceId, gateId, triggerInstance, data):
     count += 1
     print("*** Evaluate:", serviceId, gateId, triggerInstance, flush=True)
 
-    gateSpec, guardSpec  = controller.serve(serviceId, gateId)
-
+    gateSpec, guardSpec, modelers  = controller.serve(serviceId, gateId)
 
     try:
         LearnLimit = float(gateSpec["LearnLimit"])
@@ -58,13 +56,14 @@ def evaluate(serviceId, gateId, triggerInstance, data):
         learnUntil = guardSpec["learnUntil"]
         unblockUntil = guardSpec["unblockUntil"]
         unlearnUntil = guardSpec["unlearnUntil"]
-        modelers = guardSpec["modelers"]
+
         now = time.time()
     except:
         print("Gate is not proper - missing data", gateSpec)
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
         return np.array([True])
+
     n = guardSpec["my_n"] + 1
     guardSpec["my_n"] = n
     n += guardSpec["base_n"]

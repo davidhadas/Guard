@@ -15,41 +15,38 @@ import Histograms
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
-#import Fingerprints
-
-
 gates = {}
-services = {}
+serviceSpec = {}
+serviceModelers = {}
+serviceStatus = {}
 modelers = Modeler.modelers
 
 reloadGuardians = True
 
-
-
+def addService(serviceId):
+    print("Controller  - serving a new service!!", serviceId)
+    serviceModelers[serviceId] = {}
+    serviceStatus[serviceId] = {}
+    serviceSpec[serviceId] = {"learnUntil": 0,
+                              "unblockUntil": 0,
+                              "unlearnUntil": 0,
+                              "my_n": 0,
+                              "base_n": 0}
+    for gId in gates:
+        gate = gates[gId]
+        gateSpec = gate["spec"]
+        serviceModelers[serviceId][gId] = [m(gateSpec) for m in modelers]
+        serviceStatus[serviceId][gId] = {}
 
 def serve(serviceId, gateId):
-    if serviceId not in services:
-        print("Controller  - serving a new service!!", serviceId)
-        services[serviceId] = {}
-
     if (gateId not in gates):
         print("Gate is missing", gateId)
         return ({}, [])
+    if serviceId not in serviceSpec:
+        addService(serviceId)
+        createGuardian(serviceId)
 
-    gate = gates[gateId]
-    gateSpec = gate["spec"]
-    if gateId not in services[serviceId]:
-        print("Controller  - serving a new gate for service!!", serviceId, gateId)
-        createGuardian(gateId, serviceId)
-        services[serviceId][gateId] = {"modelers": [m(gateSpec) for m in modelers],
-                                       "status": {},
-                                       "learnUntil": 0,
-                                       "unblockUntil": 0,
-                                       "unlearnUntil": 0,
-                                       "my_n": 0,
-                                       "base_n": 0}
-
-    return gateSpec, services[serviceId][gateId]
+    return gateSpec, serviceSpec[serviceId], serviceModelers[serviceId][gateId]
 
 
 def deleteGuardian(serviceId):
@@ -96,15 +93,14 @@ def getGuardian(gateId, serviceId):
 
 def createGuardian(serviceId):
     # custom resource defined as dict
+
     guardian = {
         "apiVersion": "ibmresearch.com/v1",
         "kind": "Guardians",
         "metadata": {
             "name": serviceId
         },
-        "spec": {
-            "serviceId": serviceId
-        },
+        "spec": {"serviceId": serviceId },
         "status": {}
     }
     try:
@@ -231,15 +227,15 @@ def watchGuardians():
                     guardianId = guardian["metadata"]["name"]
                     print("Guardians event:",t, resourceVersion, guardianId,  flush=True)
                     if t == "DELETED":
-                        status = {}
-                        del services[serviceId][gateId]
+                        del (serviceModelers[serviceId])
+                        del (serviceStatus[serviceId])
+                        del (serviceData[serviceId])
 
                     if t == "MODIFIED" or t == "ADDED":
                         num += 1
+                        status = guardian["status"]
                         serviceId = guardian["spec"]["serviceId"]
-                        if serviceId not in services:
-                            print("new Service found!!", serviceId, services, flush=True)
-                            services[serviceId] = {}
+                        print("Guardian new object",num, serviceId, flush=True)
 
                         learnUntil = unlearnUntil = unblockUntil = 0
                         if ("learn_until" in guardian["spec"]):
@@ -248,37 +244,27 @@ def watchGuardians():
                             unlearnUntil = float(guardian["spec"]["unlearn_until"])
                         if ("unblock_until" in guardian["spec"]):
                             unblockUntil = float(guardian["spec"]["unblock_until"])
-                        status = guardian["status"]
 
-                        print("Guardian new object",num, serviceId, flush=True)
-                        for gateId in gates:
-                            gate = gates[gateId]
-                            print (">> gate is: ",gate)
-                            gateSpec = gate["spec"]
+                        if serviceId not in serviceSpec:
+                            addService(serviceId)
+                        serviceSpec[serviceId]["learnUntil"] = learnUntil
+                        serviceSpec[serviceId]["unblockUntil"] = unblockUntil
+                        serviceSpec[serviceId]["unlearnUntil"] = unlearnUntil
 
-                            if gateId not in services[serviceId]:
-                                print("new Guardian Gate found - initializing all modelers", serviceId, gateId, flush=True)
-                                services[serviceId][gateId] =   {"modelers": [m(gateSpec) for m in modelers],
-                                                                 "status": {},
-                                                                 "learnUntil": learnUntil,
-                                                                 "unblockUntil": unlearnUntil,
-                                                                 "unlearnUntil": unblockUntil,
-                                                                 "my_n": 0,
-                                                                 "base_n": 0}
 
-                            if "_n" not in status:
-                                services[serviceId][gateId]["base_n"] = 0
+                        if "_n" not in status:
+                            serviceSpec[serviceId]["base_n"] = 0
+                        else:
+                            values = status["_n"]
+                            if not isinstance(values, int):
+                                serviceSpec[serviceId]["base_n"] = 0
                             else:
-                                values = status["_n"]
-                                if not isinstance(values, int):
-                                    services[serviceId][gateId]["base_n"] = 0
-                                else:
-                                    services[serviceId][gateId]["base_n"] = int(values)
+                                serviceSpec[serviceId]["base_n"] = int(values)
+                        for gateId in gates:
                             if gateId in status:
-                                services[serviceId][gateId]["status"] = status["gateId"]
-                                for m in services[serviceId][gateId]["modelers"]:
-                                    m.crdload(status["gateId"])
-
+                                serviceStatus[serviceId][gateId] = status[gateId]
+                                for m in serviceModelers[serviceId][gateId]:
+                                    m.crdload(status[gateId])
                         print("GGG... Guradian successfuly updated", num, guardianId, resourceVersion, flush=True)
                 except:
                     print("GGG... Guradian exception illegal object", num, guardianId, flush=True)
@@ -300,17 +286,17 @@ def watchGuardians():
             time.sleep(50+start-end)
             resourceVersion = ''
         try:
-            serviceIds = list(services.keys())
+            serviceIds = list(serviceSpec.keys())
             if len(serviceIds):
                 serviceId = random.choice(serviceIds)
-                print("watchGuardians storing..", serviceId, services[serviceId])
-                n = services[serviceId][gateId]["base_n"] + services[serviceId]["my_n"]
-                services[serviceId][gateId]["my_n"] = 0
+                print("watchGuardians storing..", serviceId)
+                n = serviceSpec[serviceId]["base_n"] + serviceSpec[serviceId]["my_n"]
+                serviceSpec[serviceId]["my_n"] = 0
 
                 status = {"_n": n}
-                for gateId in services[serviceId]:
-                    status[status] = {}
-                    for m in services[serviceId][gateId]["modelers"]:
+                for gateId in serviceStatus[serviceId]:
+                    status[gateId] = {}
+                    for m in serviceModelers[serviceId][gateId]:
                         m.crdstore(status[gateId])
                 status = {"status": status}
                 print("Patching guardian crd...", serviceId, status, flush=True)
@@ -411,13 +397,18 @@ def watchGates():
                     print("Gate Event", num, gateId, t, flush=True)
                     if t == "MODIFIED" or t == "ADDED":
                         gates[gateId] = gate
-                    elif t == "DELETED":
-                        del (gates[gateId])
-                    for serviceId, service in services.items():
-                        if (gateId in service):
-                            for m in service[gateId]["modelers"]:
-                                m.configFromGate(gateSpec)
 
+                        for serviceId in serviceSpec:
+                            if gateId in serviceModelers[serviceId]:
+                                for m in serviceModelers[serviceId][gateId]:
+                                    m.configFromGate(gateSpec)
+
+                    elif t == "DELETED":
+                        for serviceId in serviceSpec:
+                            if gateId in serviceModelers[serviceId]:
+                                del(serviceModelers[serviceId][gateId])
+                                del(serviceStatus[serviceId][gateId])
+                        del (gates[gateId])
                     reloadGuardians = True
 
                     print("GGG... Gate added:", num, gateId, resourceVersion, LearnLimit, AllowLimit, minimumLearning, flush=True)
