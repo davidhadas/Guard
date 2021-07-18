@@ -17,15 +17,17 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'histograms': [[1E10, 0, 1, 1E10, 0, 1E10]]})
+            m.learn()
+        for i in range(800):
             r = m.assess({'histograms': [[1E10, 0, 1, 1E10, 0, 1E10]]})
             #print(r)
             #print(m.mean)
             self.assertLess(r[0], 0.25)
             m.learn()
-
         #print(m.mean)
         self.assertEqual(len(m.keys["test-01"]), 1)
         self.assertAlmostEqual(m.mean[0][0], 2E10, delta=1E9)
@@ -52,19 +54,20 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
             r = m.assess({'histograms': [[1E10, 0, 1, 1E10, 0, 1E10]]})
             #print (r)
+            m.learn()
+        for i in range(800):
+            r = m.assess({'histograms': [[1E10, 0, 1, 1E10, 0, 1E10]]})
+            # print (r)
             self.assertLess(r[0], 0.25)
             m.learn()
         status = {}
         m.crdstore(status)
         #print(status)
-
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 1000)
 
         self.assertTrue("histograms" in status)
         values = status["histograms"]
@@ -155,5 +158,5 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })

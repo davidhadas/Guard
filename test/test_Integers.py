@@ -17,13 +17,15 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'integers': [5]})
+            m.learn()
+        for i in range(800):
             r = m.assess({'integers': [5]})
             self.assertLess(r[0], 0.25)
             m.learn()
-
         self.assertEqual(len(m.keys["test"]), 1)
         self.assertAlmostEqual(m.mean[0][0], 5.0, delta=0.2)
         self.assertLess(m.sdev[0][0], 1.5)
@@ -35,9 +37,12 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'integers': [5]})
+            m.learn()
+        for i in range(800):
             r = m.assess({'integers': [5]})
             self.assertLess(r[0], 0.2)
             m.learn()
@@ -45,8 +50,6 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print(status)
 
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 1000)
 
         self.assertTrue("integers" in status)
         val = status["integers"]

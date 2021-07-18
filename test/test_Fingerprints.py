@@ -17,14 +17,21 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 10
+            , "minimumLearning": 200
         })
         startTime = time.time()
-        for i in range(10000):
+
+        for i in range(200):
+            r = m.assess({'fingerprints': ["ABC"]})
+            # print(r)
+            # print(m.mean)
+            # self.assertEqual(r[0], 0)
+            m.learn()
+        for i in range(9800):
             r = m.assess({'fingerprints': ["ABC"]})
             #print(r)
             #print(m.mean)
-            self.assertEqual(r[0], 0)
+            #self.assertEqual(r[0], 0)
             m.learn()
         delta = time.time() - startTime
         self.assertLess(delta, 10)
@@ -47,9 +54,19 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'fingerprints': ["AAA"]})
+            m.learn()
+            r = m.assess({'fingerprints': ["BBB"]})
+            m.learn()
+            r = m.assess({'fingerprints': ["AAA"]})
+            m.learn()
+            r = m.assess({'fingerprints': ["CCC"]})
+            m.learn()
+
+        for i in range(800):
             r = m.assess({'fingerprints': ["AAA"]})
             self.assertEqual(r[0], 0)
             m.learn()
@@ -88,7 +105,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
 
         for i in range(100):
@@ -111,9 +128,19 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'fingerprints': ["A1", "A2", "A3"]})
+            m.learn()
+            r = m.assess({'fingerprints': ["B1", "B2", "A3"]})
+            m.learn()
+            r = m.assess({'fingerprints': ["A1", "A2", "A3"]})
+            m.learn()
+            r = m.assess({'fingerprints': ["C1", "A2", "A3"]})
+            m.learn()
+
+        for i in range(800):
             r = m.assess({'fingerprints': ["A1", "A2", "A3"]})
             self.assertEqual(r[0], 0)
             self.assertEqual(r[1], 0)
@@ -161,7 +188,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
 
         status = {'fingerprints': {
@@ -182,9 +209,6 @@ class MyTestCase(unittest.TestCase):
         keys = list(val.keys())
         # print(keys, values)
         self.assertEqual(len(keys), 1)
-
-        self.assertTrue("_n" in status)
-        #        self.assertEqual(val["_n"], 5006000)
 
         self.assertTrue("test" in val)
         values = val["test"]
@@ -216,7 +240,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         for i in range(100):
             r = m.assess({'fingerprints': ["A1"]})
@@ -235,8 +259,6 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         print(status)
 
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 600)
 
         self.assertTrue("fingerprints" in status)
         values = status["fingerprints"]
@@ -307,9 +329,6 @@ class MyTestCase(unittest.TestCase):
         #print(keys, values)
         self.assertEqual(len(keys), 1)
 
-        self.assertTrue("_n" in status)
-#        self.assertEqual(val["_n"], 5006000)
-
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
@@ -348,7 +367,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         status = {'_n': 5000000, 'fingerprints': {
             'test': {'borke1': 11,
@@ -376,9 +395,6 @@ class MyTestCase(unittest.TestCase):
         keys = list(val.keys())
         #print(keys, values)
         self.assertEqual(len(keys), 1)
-
-        self.assertTrue("_n" in status)
-        #        self.assertEqual(val["_n"], 5006000)
 
         self.assertTrue("test" in val)
         values = val["test"]
@@ -422,9 +438,6 @@ class MyTestCase(unittest.TestCase):
         keys = list(val.keys())
         #print(keys, values)
         self.assertEqual(len(keys), 1)
-
-        self.assertTrue("_n" in status)
-        #        self.assertEqual(val["_n"], 5006000)
 
         self.assertTrue("test" in val)
         values = val["test"]

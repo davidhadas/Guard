@@ -198,7 +198,7 @@ class Modeler:
                 self.p[self.cmask] = 0
                 #n = self.base_n + self.my_n
                 #if self.minimumLearning < n:
-                #    return self.p.tolist()
+                return self.p.tolist()
             except:
                 print(self.name, "Calc except during assess")
                 traceback.print_exc(file=sys.stdout)

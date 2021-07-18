@@ -19,7 +19,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         for i in range(1000):
             nsample = self.nsamples[i]
@@ -52,7 +52,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         for i in range(1000):
             nsample = self.nsamples[i]
@@ -84,7 +84,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         startTime = time.time()
         for i in range(1000):
@@ -109,7 +109,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         startTime = time.time()
         for j in range(10):
@@ -133,7 +133,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 1000000
+            , "minimumLearning": 200
         })
         m.maxConcepts = 100
         m.reset()
@@ -161,7 +161,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         startTime = time.time()
         for j in range(100):
@@ -187,7 +187,12 @@ class MyTestCase(unittest.TestCase):
             , "collectorId": "mygate"
             , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'markers': [5]})
+            #print(i,r)
+            #self.assertAlmostEqual(r[0], 0.05, delta=0.05)
+            m.learn()
+        for i in range(800):
             r = m.assess({'markers': [5]})
             #print(i,r)
             self.assertAlmostEqual(r[0], 0.05, delta=0.05)
@@ -207,9 +212,12 @@ class MyTestCase(unittest.TestCase):
                 , "AllowLimit": 10
                 , "LearnLimit": 3
                 , "collectorId": "mygate"
-                , "minimumLearning": 100
+                , "minimumLearning": 200
             })
-            for i in range(1000):
+            for i in range(200):
+                r = m.assess({'markers': [x]})
+                m.learn()
+            for i in range(800):
                 r = m.assess({'markers': [x]})
                 self.assertLess(r[0], 2)
                 m.learn()
@@ -225,7 +233,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
 
         status = {"_n": 777777777
@@ -238,9 +246,6 @@ class MyTestCase(unittest.TestCase):
         m.crdload(status)
         status = {}
         m.crdstore(status)
-
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 777777777)
 
         self.assertTrue("markers" in status)
         val = status["markers"]
@@ -274,18 +279,18 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'markers': [5]})
+            m.learn()
+        for i in range(800):
             r = m.assess({'markers': [5]})
             self.assertTrue(r[0] < 0.1)
             m.learn()
         status = {}
         m.crdstore(status)
         #print(status)
-
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 1000)
 
         self.assertTrue("markers" in status)
         val = status["markers"]
@@ -328,8 +333,6 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 555)
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
@@ -361,13 +364,11 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
         status = {}
         m.crdstore(status)
         #print("status", status)
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 0)
 
         self.assertTrue("markers" in status)
         val = status["markers"]
@@ -398,9 +399,6 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print("Storing...", status)
 
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 555)
-
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
@@ -427,9 +425,12 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
-        for i in range(1000):
+        for i in range(200):
+            r = m.assess({'markers': [5]})
+            m.learn()
+        for i in range(800):
             r = m.assess({'markers': [5]})
             self.assertTrue(r[0] < 0.1)
             m.learn()
@@ -437,8 +438,6 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print(status)
 
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 1000)
 
         self.assertTrue("markers" in status)
         val = status["markers"]
@@ -482,8 +481,6 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("markers" in status)
         val = status["markers"]
         self.assertTrue(isinstance(val, dict))
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 555)
         self.assertTrue("test" in val)
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
@@ -501,7 +498,7 @@ class MyTestCase(unittest.TestCase):
             , "AllowLimit": 10
             , "LearnLimit": 3
             , "collectorId": "mygate"
-            , "minimumLearning": 100
+            , "minimumLearning": 200
         })
 
         m.maxConcepts = 2
@@ -523,8 +520,6 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         #print("Storing...", status)
 
-        self.assertTrue("_n" in status)
-        self.assertEqual(status["_n"], 555)
 
         self.assertTrue("markers" in status)
         val = status["markers"]
