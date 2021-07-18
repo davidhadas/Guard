@@ -15,12 +15,12 @@ from Guard import controller
 count = 0
 
 
-def resetServiceGate(serviceid, gateid):
-    if serviceid not in controller.services or gateid not in controller.services[serviceid]:
+def resetService(serviceid):
+    if serviceid not in controller.services:
         return {}
-    controller.deleteGuardian(gateid, serviceid)
-    controller.services[serviceid][gateid] = []
-    print("controller deletedGuardian", serviceid, gateid, flush=True)
+    controller.deleteGuardian(serviceid)
+    controller.services[serviceid] = {}
+    print("controller deletedGuardian", serviceid, flush=True)
 
 
 def display():
@@ -30,21 +30,16 @@ def display():
 def displayService(serviceid):
     if serviceid not in controller.services:
         return {}
-    return list(controller.services[serviceid].keys())
+    data = {}
+    for gateId in controller.services[serviceid]:
+        data[gateId] = controller.services[serviceid][gateId]["status"]
+    return data
 
 
-def displayServiceGate(serviceid, gateid):
-    if serviceid not in controller.services or gateid not in controller.services[serviceid]:
-        return {}
-    return controller.services[serviceid][gateid]["status"]
-
-
-def configGuardian(serviceId, gateId, data):
+def configGuardian(serviceId, data):
     print("configGuardian 1")
-    controller.configStatusGuardian(serviceId, gateId, data)
+    controller.configGuardian(serviceId, data)
     print("configGuardian 2")
-    controller.configGuardian(serviceId, gateId, data)
-    print("configGuardian 3")
 
 
 def evaluate(serviceId, gateId, triggerInstance, data):

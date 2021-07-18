@@ -36,29 +36,22 @@ def display():
     return jsonify(d)
 
 
-@app.route('/data/<serviceid>', methods = ["GET"])
+@app.route('/data/<serviceid>', methods = ["GET", "POST"])
 def displayService(serviceid):
     print("**  /displayService called")
-    d = evaluator.displayService(serviceid)
-    return jsonify(d)
-
-
-@app.route('/data/<serviceid>/<gateid>', methods = ["GET", "POST"])
-def displayServiceGate(serviceid, gateid):
     if (request.method == "GET"):
-        print ("** /displayServiceGate called")
-        d = evaluator.displayServiceGate(serviceid, gateid)
+        print("** /displayService called")
+        d = evaluator.displayService(serviceid)
         return jsonify(d)
     else: # "POST"
-        print("** /displayServiceGate POST", request.json)
-        evaluator.configGuardian(serviceid, gateid, request.json)
+        print("** /displayService POST", request.json)
+        evaluator.configGuardian(serviceid, request.json)
         return ""
 
-
-@app.route('/reset/<serviceid>/<gateid>')
-def resetServiceGate(serviceid, gateid):
-    print("** /resetServiceGate called")
-    evaluator.resetServiceGate(serviceid, gateid)
+@app.route('/reset/<serviceid>')
+def resetService(serviceid):
+    print("** /resetService called")
+    evaluator.resetService(serviceid)
     return jsonify({"Reset": "OK"})
 
 

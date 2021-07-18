@@ -52,19 +52,19 @@ def serve(serviceId, gateId):
     return gateSpec, services[serviceId][gateId]
 
 
-def deleteGuardian(gateId, serviceId):
-    print("Now in deleteGuardian", gateId + "." + serviceId)
+def deleteGuardian(serviceId):
+    print("Now in deleteGuardian",  serviceId)
     try:
         api.delete_namespaced_custom_object(
             group="ibmresearch.com",
             version="v1",
             namespace="knative-guardian",
-            name=gateId+"."+serviceId,
+            name=serviceId,
             plural="guardians"
         )
-        print("Guardian deleted", gateId+"."+serviceId)
+        print("Guardian deleted", serviceId)
     except client.exceptions.ApiException as e:
-        print("Guardian could not be deleted for", gateId+"."+serviceId, e)
+        print("Guardian could not be deleted for", serviceId, e)
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
 
@@ -94,17 +94,16 @@ def getGuardian(gateId, serviceId):
 
 
 
-def createGuardian(gateId, serviceId):
+def createGuardian(serviceId):
     # custom resource defined as dict
     guardian = {
         "apiVersion": "ibmresearch.com/v1",
         "kind": "Guardians",
         "metadata": {
-            "name": gateId + "." + serviceId
+            "name": serviceId
         },
         "spec": {
-            "gateId": gateId
-            , "serviceId": serviceId
+            "serviceId": serviceId
         },
         "status": {}
     }
@@ -117,95 +116,63 @@ def createGuardian(gateId, serviceId):
             plural="guardians",
             body= guardian
         )
-        print("Guardian created for", gateId+"."+serviceId, api_response)
+        print("Guardian created for", serviceId, api_response)
     except client.exceptions.ApiException as e:
-        print("Guardian could not be created for", gateId+"."+serviceId, e)
+        print("Guardian could not be created for", serviceId, e)
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
 
     return guardian
 
 
-def patchGuardian(gateId, serviceId, status):
+def patchGuardian(serviceId, status):
     try:
         # patch the resource and print out data
-        print ("patchGuardian", gateId, serviceId, status)
+        print ("patchGuardian", serviceId, status)
         api.patch_namespaced_custom_object(
             group="ibmresearch.com",
             version="v1",
-            name=gateId+"."+serviceId,
+            name=serviceId,
             namespace="knative-guardian",
             plural="guardians",
             body=status
         )
-        print("Guardian patched", gateId+"."+serviceId, status)
+        print("Guardian patched", serviceId, status)
     except client.exceptions.ApiException as e:
-        print("Guardian not patched", gateId+"."+serviceId, e)
+        print("Guardian not patched",  serviceId, e)
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
-        createGuardian(gateId, serviceId)
+        createGuardian(serviceId)
 
-def configStatusGuardian(serviceId, gateId, data):
+def configGuardian(serviceId, data):
     try:
         now = time.time()
         learnUntil = float(data["learnUntil"])*60*1000+now;
         unlearnUntil = float(data["unlearnUntil"])*60*1000+now;
         unblockUntil = float(data["unblockUntil"])*60*1000+now;
 
-        spec = {"status": {"learnUntil": learnUntil,
-                          "unlearnUntil": unlearnUntil,
-                          "unblockUntil": unblockUntil
+        spec = {"spec": {"learn_until": learnUntil,
+                          "unlearn_until": unlearnUntil,
+                          "unblock_until": unblockUntil
                           }}
 
-        print("Guardian spec/status patch", gateId + "." + serviceId, spec)
+        print("Guardian spec patch", serviceId, spec)
 
         api.patch_namespaced_custom_object(
             group="ibmresearch.com",
             version="v1",
-            name=gateId+"."+serviceId,
+            name= serviceId,
             namespace="knative-guardian",
             plural="guardians",
             body=spec
         )
-        print("Guardian spec/status patched", gateId+"."+serviceId, spec)
+        print("Guardian spec patched", serviceId, spec)
     except NameError:
-        print("MIMIC: Guardian spec/status patched", gateId+"."+serviceId, spec)
+        print("MIMIC: Guardian spec patched", serviceId, spec)
     except client.exceptions.ApiException as e:
-        print("Guardian not patched", gateId+"."+serviceId, e)
+        print("Guardian not patched", serviceId, e)
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
-        createGuardian(gateId, serviceId)
-
-def configGuardian(serviceId, gateId, data):
-    try:
-        now = time.time()
-        learnUntil = float(data["learnUntil"])*60*1000+now;
-        unlearnUntil = float(data["unlearnUntil"])*60*1000+now;
-        unblockUntil = float(data["unblockUntil"])*60*1000+now;
-
-        spec = {"spec": {"learnUntil": learnUntil,
-                          "unlearnUntil": unlearnUntil,
-                          "unblockUntil": unblockUntil
-                          }}
-
-        print("Guardian spec patch", gateId + "." + serviceId, spec)
-
-        api.patch_namespaced_custom_object(
-            group="ibmresearch.com",
-            version="v1",
-            name=gateId+"."+serviceId,
-            namespace="knative-guardian",
-            plural="guardians",
-            body=spec
-        )
-        print("Guardian spec patched", gateId+"."+serviceId, spec)
-    except NameError:
-        print("MIMIC: Guardian spec patched", gateId+"."+serviceId, spec)
-    except client.exceptions.ApiException as e:
-        print("Guardian not patched", gateId+"."+serviceId, e)
-        traceback.print_exc(file=sys.stdout)
-        print("---------Error-------", flush=True)
-        createGuardian(gateId, serviceId)
 
 
 def getGate(gateId):
@@ -254,7 +221,6 @@ def watchGuardians():
             start = time.time()
             for event in stream:
                 print("Guardians event:", flush=True)
-
                 guardianId = "unknown"
                 try:
                     #pprint(event)
@@ -264,59 +230,56 @@ def watchGuardians():
                         resourceVersion = guardian["metadata"]["resourceVersion"]
                     guardianId = guardian["metadata"]["name"]
                     print("Guardians event:",t, resourceVersion, guardianId,  flush=True)
-
-                    num += 1
-
-                    serviceId = guardian["spec"]["serviceId"]
-                    gateId = guardian["spec"]["gateId"]
-                    if ("learn_until" in guardian["spec"]):
-                        guardian["spec"]["learnUntil"] = float(guardian["spec"]["learn_until"])
-                    if ("unlearn_until" in guardian["spec"]):
-                        guardian["spec"]["unlearnUntil"] = float(guardian["spec"]["unlearn_until"])
-                    if ("unblock_until" in guardian["spec"]):
-                        guardian["spec"]["unblockUntil"] = float(guardian["spec"]["unblock_until"])
-                    status = guardian["status"]
-
-                    print("Guardian new object",num, gateId, serviceId, flush=True)
-                    if (gateId in gates):
-                        gate = gates[gateId]
-                        print (">> gate is: ",gate)
-                        gateSpec = gate["spec"]
-
-                    else:
-                        print("Guardian without Gate is ignored!", num, guardianId, flush=True)
-                        continue
-
-                    if serviceId not in services:
-                        print("new Service found!!", serviceId, services, flush=True)
-                        services[serviceId] = {}
-
-                    if gateId not in services[serviceId]:
-                        print("new Guardian found - initializing all modelers", serviceId, gateId, services[serviceId], flush=True)
-                        services[serviceId][gateId] =   {"modelers": [m(gateSpec) for m in modelers],
-                                                         "status": {},
-                                                         "learnUntil": 0,
-                                                         "unblockUntil": 0,
-                                                         "unlearnUntil": 0,
-                                                         "my_n": 0,
-                                                         "base_n": 0}
                     if t == "DELETED":
                         status = {}
                         del services[serviceId][gateId]
+
                     if t == "MODIFIED" or t == "ADDED":
-                        services[serviceId][gateId]["status"] = status
-                        if "_n" not in status:
-                            services[serviceId][gateId]["base_n"] = 0
-                        else:
-                            values = status["_n"]
-                            if not isinstance(values, int):
+                        num += 1
+                        serviceId = guardian["spec"]["serviceId"]
+                        if serviceId not in services:
+                            print("new Service found!!", serviceId, services, flush=True)
+                            services[serviceId] = {}
+
+                        learnUntil = unlearnUntil = unblockUntil = 0
+                        if ("learn_until" in guardian["spec"]):
+                            learnUntil = float(guardian["spec"]["learn_until"])
+                        if ("unlearn_until" in guardian["spec"]):
+                            unlearnUntil = float(guardian["spec"]["unlearn_until"])
+                        if ("unblock_until" in guardian["spec"]):
+                            unblockUntil = float(guardian["spec"]["unblock_until"])
+                        status = guardian["status"]
+
+                        print("Guardian new object",num, serviceId, flush=True)
+                        for gateId in gates:
+                            gate = gates[gateId]
+                            print (">> gate is: ",gate)
+                            gateSpec = gate["spec"]
+
+                            if gateId not in services[serviceId]:
+                                print("new Guardian Gate found - initializing all modelers", serviceId, gateId, flush=True)
+                                services[serviceId][gateId] =   {"modelers": [m(gateSpec) for m in modelers],
+                                                                 "status": {},
+                                                                 "learnUntil": learnUntil,
+                                                                 "unblockUntil": unlearnUntil,
+                                                                 "unlearnUntil": unblockUntil,
+                                                                 "my_n": 0,
+                                                                 "base_n": 0}
+
+                            if "_n" not in status:
                                 services[serviceId][gateId]["base_n"] = 0
                             else:
-                                services[serviceId][gateId]["base_n"] = int(values)
-                        for m in services[serviceId][gateId]["modelers"]:
-                            m.crdload(status)
+                                values = status["_n"]
+                                if not isinstance(values, int):
+                                    services[serviceId][gateId]["base_n"] = 0
+                                else:
+                                    services[serviceId][gateId]["base_n"] = int(values)
+                            if gateId in status:
+                                services[serviceId][gateId]["status"] = status["gateId"]
+                                for m in services[serviceId][gateId]["modelers"]:
+                                    m.crdload(status["gateId"])
 
-                    print("GGG... Guradian successfuly updated", num, guardianId, resourceVersion, flush=True)
+                        print("GGG... Guradian successfuly updated", num, guardianId, resourceVersion, flush=True)
                 except:
                     print("GGG... Guradian exception illegal object", num, guardianId, flush=True)
                     traceback.print_exc(file=sys.stdout)
@@ -340,20 +303,19 @@ def watchGuardians():
             serviceIds = list(services.keys())
             if len(serviceIds):
                 serviceId = random.choice(serviceIds)
-                gateIds = list(services[serviceId].keys())
-                if len(gateIds):
-                    gateId = random.choice(list(services[serviceId].keys()))
-                    print("watchGuardians storing..", serviceId, gateId, services[serviceId][gateId])
-                    n = services[serviceId][gateId]["base_n"] + services[serviceId][gateId]["my_n"]
-                    services[serviceId][gateId]["my_n"] = 0
+                print("watchGuardians storing..", serviceId, services[serviceId])
+                n = services[serviceId][gateId]["base_n"] + services[serviceId]["my_n"]
+                services[serviceId][gateId]["my_n"] = 0
 
-                    status = {"_n": n}
+                status = {"_n": n}
+                for gateId in services[serviceId]:
+                    status[status] = {}
                     for m in services[serviceId][gateId]["modelers"]:
-                        m.crdstore(status)
-                    status = {"status": status}
-                    print("Patching guardian crd...", gateId, serviceId, status, flush=True)
-                    patchGuardian(gateId, serviceId, status)
-                    print("Storing Guardians", flush=True)
+                        m.crdstore(status[gateId])
+                status = {"status": status}
+                print("Patching guardian crd...", serviceId, status, flush=True)
+                patchGuardian(serviceId, status)
+                print("Storing Guardians", flush=True)
         except:
             e = sys.exc_info()[0]
             print("Failed to store object", flush=True)
@@ -494,7 +456,6 @@ try:
     gateWatcher.start()
 except:
     print("config.load_incluster_config() exception")
-
 
 
 '''
