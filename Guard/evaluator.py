@@ -40,7 +40,12 @@ def displayServiceGate(serviceid, gateid):
 
 
 def configGuardian(serviceId, gateId, data):
+    print("configGuardian 1")
+    controller.configStatusGuardian(serviceId, gateId, data)
+    print("configGuardian 2")
     controller.configGuardian(serviceId, gateId, data)
+    print("configGuardian 3")
+
 
 def evaluate(serviceId, gateId, triggerInstance, data):
     # get the model for (serviceId, collectorId)

@@ -7,7 +7,6 @@ import sys
 import os
 
 print("*** Guardian starts ***", flush=True)
-
 def evaluate(serviceId, collectorId, triggerInstance, data):
     print ("evaluate ", serviceId, collectorId, triggerInstance, data)
     evaluator.evaluate(serviceId, collectorId, triggerInstance, data)

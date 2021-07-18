@@ -145,6 +145,37 @@ def patchGuardian(gateId, serviceId, status):
         print("---------Error-------", flush=True)
         createGuardian(gateId, serviceId)
 
+def configStatusGuardian(serviceId, gateId, data):
+    try:
+        now = time.time()
+        learnUntil = float(data["learnUntil"])*60*1000+now;
+        unlearnUntil = float(data["unlearnUntil"])*60*1000+now;
+        unblockUntil = float(data["unblockUntil"])*60*1000+now;
+
+        spec = {"status": {"learnUntil": learnUntil,
+                          "unlearnUntil": unlearnUntil,
+                          "unblockUntil": unblockUntil
+                          }}
+
+        print("Guardian spec/status patch", gateId + "." + serviceId, spec)
+
+        api.patch_namespaced_custom_object(
+            group="ibmresearch.com",
+            version="v1",
+            name=gateId+"."+serviceId,
+            namespace="knative-guardian",
+            plural="guardians",
+            body=spec
+        )
+        print("Guardian spec/status patched", gateId+"."+serviceId, spec)
+    except NameError:
+        print("MIMIC: Guardian spec/status patched", gateId+"."+serviceId, spec)
+    except client.exceptions.ApiException as e:
+        print("Guardian not patched", gateId+"."+serviceId, e)
+        traceback.print_exc(file=sys.stdout)
+        print("---------Error-------", flush=True)
+        createGuardian(gateId, serviceId)
+
 def configGuardian(serviceId, gateId, data):
     try:
         now = time.time()
@@ -152,11 +183,12 @@ def configGuardian(serviceId, gateId, data):
         unlearnUntil = float(data["unlearnUntil"])*60*1000+now;
         unblockUntil = float(data["unblockUntil"])*60*1000+now;
 
-        spec = { "spec": {"learnUntil": learnUntil,
+        spec = {"spec": {"learnUntil": learnUntil,
                           "unlearnUntil": unlearnUntil,
                           "unblockUntil": unblockUntil
                           }}
 
+        print("Guardian spec patch", gateId + "." + serviceId, spec)
 
         api.patch_namespaced_custom_object(
             group="ibmresearch.com",
