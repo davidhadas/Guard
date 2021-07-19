@@ -39,11 +39,10 @@ def display():
 
 @app.route('/data/<serviceid>', methods = ["GET", "POST"])
 def displayService(serviceid):
+    now = time.time()
     if (request.method == "GET"):
         spec = evaluator.getConfigGuardian(serviceid)
         print("** /dataService called GET", spec)
-
-        now = time.time()
         data = {
             "learnUntil": max(spec.get("learnUntil", 0) - now, 0),
             "unblockUntil": max(spec.get("unblockUntil", 0) - now, 0),
@@ -53,10 +52,11 @@ def displayService(serviceid):
     else: # "POST"
         print("** /dataService POST", request.json)
         spec = request.json
+        now = time.time()
         data = {
-            "learnUntil": spec.get("learnUntil", 0),
-            "unblockUntil": spec.get("unblockUntil", 0),
-            "unlearnUntil": spec.get("unlearnUntil", 0)
+            "learnUntil":   float(spec.get("learnUntil", 0)) + now,
+            "unblockUntil": float(spec.get("unblockUntil", 0))+ now,
+            "unlearnUntil": float(spec.get("unlearnUntil", 0))+ now
         }
         evaluator.configGuardian(serviceid, data)
         return ""

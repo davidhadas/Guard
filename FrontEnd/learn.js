@@ -1,7 +1,10 @@
 
 var timeOptionsText = ["(don't set)", "1 Minuete", "2 Minuetes", "5 Minuetes", "10 Minuetes", "20 Minuetes", "30 Minuetes",
     "1 Hour", "2 Hours", "2 Hours", "6 Hours", "24 Hours", "2 Days", "4 Days", "1 Week", "1 Month"];
-var timeOptions = [0, 1, 2, 5, 10, 20 , 30, 60, 2*60, 6*60, 24*60, 2*24*60, 4*24*60, 7*24*60, 31*24*60];
+var timeOptions = [0, 1*60, 2*60, 5*60, 10*60, 20*60 , 30*60, 60*60,
+                  2*60*60, 6*60*60, 24*60*60, 2*24*60*60, 4*24*60*60, 7*24*60*60, 31*24*60*60];
+
+
 guardians = []
 
 guardian = ""
