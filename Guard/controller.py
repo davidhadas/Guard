@@ -46,7 +46,7 @@ def serve(serviceId, gateId):
         addService(serviceId)
         createGuardian(serviceId)
 
-    return gateSpec, serviceSpec[serviceId], serviceModelers[serviceId][gateId]
+    return gates[gateId]["spec"], serviceSpec[serviceId], serviceModelers[serviceId][gateId]
 
 
 def deleteGuardian(serviceId):
@@ -139,6 +139,7 @@ def patchGuardian(serviceId, status):
         traceback.print_exc(file=sys.stdout)
         print("---------Error-------", flush=True)
         createGuardian(serviceId)
+
 
 def configGuardian(serviceId, data):
     try:

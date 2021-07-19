@@ -16,29 +16,32 @@ count = 0
 
 
 def resetService(serviceid):
-    if serviceid not in controller.services:
+    if serviceid not in controller.serviceStatus:
         return {}
     controller.deleteGuardian(serviceid)
     print("controller deletedGuardian", serviceid, flush=True)
 
 
 def display():
-    return list(controller.services.keys())
+    return list(controller.serviceStatus.keys())
 
 
-def displayService(serviceid):
-    if serviceid not in controller.services:
+def displayService(serviceId):
+    if serviceid not in controller.serviceStatus:
         return {}
     data = {}
-    for gateId in controller.services[serviceid]:
-        data[gateId] = controller.services[serviceid][gateId]["status"]
+    for gateId in controller.serviceStatus[serviceId]:
+        data[gateId] = controller.serviceStatus[serviceId][gateId]
     return data
 
 
+def getConfigGuardian(serviceId):
+    if serviceId in controller.serviceStatus:
+        return controller.serviceSpec[serviceId]
+    return {}
+
 def configGuardian(serviceId, data):
-    print("configGuardian 1")
     controller.configGuardian(serviceId, data)
-    print("configGuardian 2")
 
 
 def evaluate(serviceId, gateId, triggerInstance, data):
@@ -78,9 +81,10 @@ def evaluate(serviceId, gateId, triggerInstance, data):
     if minimumLearning < n:
         if now > unlearnUntil:
             if now < learnUntil:
-                print("Learning enforced until", serviceId, gateId, learnUntil)
+                print("Learning enforced until", serviceId, gateId, learnUntil, "Also allow!")
                 for m in modelers:
                     m.learn()
+                    return True
             elif sum(i > LearnLimit for i in p) < 2:
                 print("Learning OKed by Ensemble", serviceId, gateId)
                 for m in modelers:
@@ -90,8 +94,12 @@ def evaluate(serviceId, gateId, triggerInstance, data):
         else:
             print("Unlearning is activated until ", serviceId, gateId, unlearnUntil)
     else:
-        print("minimumLearning not met", serviceId, gateId, minimumLearning, n)
-    if unblockUntil > time.time():
+        print("minimumLearning not met - Allow", serviceId, gateId, minimumLearning, n)
+        for m in modelers:
+            m.learn()
+        return True
+
+    if unblockUntil >= now:
         print("Allow OK until", serviceId, gateId, unblockUntil, flush=True)
         return True
     elif sum(i > AllowLimit for i in p) < 2:

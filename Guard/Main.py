@@ -5,6 +5,7 @@ import numpy as np
 import traceback
 import sys
 import os
+import time
 
 print("*** Guardian starts ***", flush=True)
 def evaluate(serviceId, collectorId, triggerInstance, data):
@@ -31,22 +32,41 @@ def send_web(path):
 
 @app.route('/data/', methods = ["GET"])
 def display():
-    print("** /display called")
+    print("** /data called")
     d = evaluator.display()
     return jsonify(d)
 
 
 @app.route('/data/<serviceid>', methods = ["GET", "POST"])
 def displayService(serviceid):
-    print("**  /displayService called")
     if (request.method == "GET"):
-        print("** /displayService called")
-        d = evaluator.displayService(serviceid)
-        return jsonify(d)
+        spec = evaluator.getConfigGuardian(serviceid)
+        print("** /dataService called GET", spec)
+
+        now = time.time()
+        data = {
+            "learnUntil": max(spec.get("learnUntil", 0) - now, 0),
+            "unblockUntil": max(spec.get("unblockUntil", 0) - now, 0),
+            "unlearnUntil": max(spec.get("unlearnUntil", 0) - now, 0)
+        }
+        return jsonify(data)
     else: # "POST"
-        print("** /displayService POST", request.json)
-        evaluator.configGuardian(serviceid, request.json)
+        print("** /dataService POST", request.json)
+        spec = request.json
+        data = {
+            "learnUntil": spec.get("learnUntil", 0),
+            "unblockUntil": spec.get("unblockUntil", 0),
+            "unlearnUntil": spec.get("unlearnUntil", 0)
+        }
+        evaluator.configGuardian(serviceid, data)
         return ""
+
+@app.route('/status/<serviceid>', methods = ["GET"])
+def statusService(serviceid):
+    print("** /statusService called GET")
+    d = evaluator.displayService(serviceid)
+    return jsonify(d)
+
 
 @app.route('/reset/<serviceid>')
 def resetService(serviceid):
@@ -105,42 +125,29 @@ if __name__ == "__main__":
         "LearnLimit": 3,
         "markers": []
     }
-    evaluator.controller.services = {
+    evaluator.controller.serviceSpec = {
+        "myapp": {},
+        "myotherapp": {}
+    }
+    evaluator.controller.serviceModelers = {
         "myapp": {
-            "gate1": {
-                 "modelers": [m(gateSpec) for m in evaluator.controller.modelers],
-                 "status": {},
-                 "learnUntil": 0,
-                 "unblockUntil": 0,
-                 "unlearnUntil": 0,
-                 "my_n": 0,
-                 "base_n": 0}
-            , "gate2": {
-                 "modelers": [m(gateSpec) for m in evaluator.controller.modelers],
-                 "status": {},
-                 "learnUntil": 0,
-                 "unblockUntil": 0,
-                 "unlearnUntil": 0,
-                 "my_n": 0,
-                 "base_n": 0}
+            "gate1":[m(gateSpec) for m in evaluator.controller.modelers],
+            "gate2": [m(gateSpec) for m in evaluator.controller.modelers]
         },
         "myotherapp": {
-            "gate1": {
-                "modelers": [m(gateSpec) for m in evaluator.controller.modelers],
-                "status": {},
-                "learnUntil": 0,
-                "unblockUntil": 0,
-                "unlearnUntil": 0,
-                "my_n": 0,
-                "base_n": 0}
-            , "gate2": {
-                "modelers": [m(gateSpec) for m in evaluator.controller.modelers],
-                "status": {},
-                "learnUntil": 0,
-                "unblockUntil": 0,
-                "unlearnUntil": 0,
-                "my_n": 0,
-                "base_n": 0}
+                "gate1": [m(gateSpec) for m in evaluator.controller.modelers],
+                "gate2": [m(gateSpec) for m in evaluator.controller.modelers]
+        }
+    }
+
+    evaluator.controller.serviceStatus = {
+        "myapp": {
+            "gate1": {}
+            , "gate2": {}
+        },
+        "myotherapp": {
+            "gate1": {}
+            , "gate2": {}
         }
     }
     app.run()

@@ -63,6 +63,9 @@ function guardianSelectChange() {
 }
 
 
+
+
+
 function timeSelectChange() {
     console.log("timeSelectChange")
     var learnTime = document.getElementById("learnUntilSelect").value;
@@ -88,10 +91,11 @@ function timeSelectChange() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(function(responseData) {
-        console.log('Set:', data, responseData);
-        alert("Success!")
-        location.reload();
+    }).then(function(response) {
+        console.log('Set:', data, response);
+        if (response.ok)  {
+            alert("Success!")
+        }
     }).catch(error => {
         alert("HTTP-Error: " + error)
     });
