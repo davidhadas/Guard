@@ -337,7 +337,7 @@ class MyTestCase(unittest.TestCase):
         values = val["test"]
         self.assertTrue(isinstance(values, dict))
         keys = list(values.keys())
-        #print(keys, values)
+        print(keys, values)
         self.assertEqual(len(keys), 2)
         # previous key
         val = values[key]

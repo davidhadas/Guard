@@ -1,11 +1,12 @@
 from Guard import Markers
 from Guard import Modeler
 import sys
-
+'''
 class Histograms(Markers.Markers):
-    name = "histograms"
+    name = ["histograms"]
     histLen = 8
-    minSdev2 = 0.0625
+    minSdev2Vals = [0.0625]
+    noise = [0.25]
 
     def expandFeatures(self, featureNames):
         fn = []
@@ -27,3 +28,4 @@ class Histograms(Markers.Markers):
         return d
 
 Modeler.modelers.append(Histograms)
+'''

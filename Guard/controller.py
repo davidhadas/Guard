@@ -143,14 +143,9 @@ def patchGuardian(serviceId, status):
 
 def configGuardian(serviceId, data):
     try:
-        now = time.time()
-        learnUntil = float(data["learnUntil"])*60+now;
-        unlearnUntil = float(data["unlearnUntil"])*60+now;
-        unblockUntil = float(data["unblockUntil"])*60+now;
-
-        spec = {"spec": {"learn_until": learnUntil,
-                          "unlearn_until": unlearnUntil,
-                          "unblock_until": unblockUntil
+        spec = {"spec": {"learn_until": data["learnUntil"],
+                          "unlearn_until": data["unlearnUntil"],
+                          "unblock_until": data["unblockUntil"]
                           }}
 
         print("Guardian spec patch", serviceId, spec)

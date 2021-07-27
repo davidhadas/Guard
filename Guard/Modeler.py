@@ -25,11 +25,10 @@ class CrdError(Exception):
 
 
 class Modeler:
-    name = "<Modeler Virtual>"
+    name = ["<Modeler Virtual>"]
     maxConcepts = 1
 
     def __init__(self, spec):
-        #print("New", self.name)
         self.numExpandedFeatures = 0
         self.configFromGate(spec)
         self.modelerReset()
@@ -37,25 +36,32 @@ class Modeler:
         #print("INIT self.numExpandedFeatures =", self.numExpandedFeatures)
 
     def configFromGate(self, spec):
-        #print(spec)
-        self.featureNames = spec[self.name]
         self.LearnLimit = spec["LearnLimit"]
         self.AllowLimit = spec["AllowLimit"]
-        #self.minimumLearning = max(spec["minimumLearning"],150)
 
-
-        if (hasattr(self, 'expandFeatures') and hasattr(self, 'expandData')):
-            self.numExpandedFeatures = len(self.featureNames)
-            self.featureNames = self.expandFeatures(self.featureNames)
-
+        self.numFeatures = 0
+        self.featureNames = []
+        self.numFeaturesByName = {}
+        self.numExpandedFeaturesByName = {}
+        for namei in range(len(self.name)):
+            name = self.name[namei]
+            self.numFeaturesByName[name] = 0
+            self.numExpandedFeaturesByName[name] = 0
+            if (name in spec):
+                fns = spec[name]
+                self.numFeaturesByName[name] = len(fns)
+                if self.expand[namei] > 1:
+                    expandedFns = []
+                    for fn in fns:
+                        for i in range(self.expand[namei]):
+                            expandedFns.append(fn + "-" + str(i) + str((i + 1) % self.expand[namei]))
+                    fns = expandedFns
+                self.featureNames.extend(fns)
+                self.numExpandedFeaturesByName[name] = len(fns)
         self.numFeatures = len(self.featureNames)
-        #print(self.name, "has been configFromGate with", self.numFeatures, "features", flush=True)
-        #print("FROMGATE self.numExpandedFeatures =", self.numExpandedFeatures)
 
     def modelerReset(self):
         print("Reset", self.name, "numFeatures", self.numFeatures)
-        #self.my_n = 0
-        #self.base_n = 0
         self.p = np.zeros(self.numFeatures)
         self.cmask = [False for ii in range(self.numFeatures)]
         self.status = {}
@@ -75,12 +81,12 @@ class Modeler:
 
 
     def crdload(self, status):
-        #print(" CRD Loading", self.name)
-        if not self.name in status:
+        name = self.name[0]
+        if not name in status:
             self.modelerReset()
             return
 
-        mystatus = status[self.name]
+        mystatus = status[name]
         if not isinstance(mystatus, dict):
             self.modelerReset()
             return
@@ -145,7 +151,6 @@ class Modeler:
             print("Modeler", self.name, fname, "BUG BUG BUG - StoreItem with illegal index!")
             return
 
-        #print("Modeler", self.name, fname, "storeItem", key_idx, val)
         key = self.keys[fname][key_idx]
         self.status[fname][key] = val
 
@@ -153,7 +158,6 @@ class Modeler:
         fname = self.featureNames[fname_idx]
         key_idx = len(self.keys[fname])
         if (self.maxConcepts > key_idx):
-            #print("Modeler", self.name, fname, "asks for getKeyIdx", key_idx)
             if not key:
                 key = secrets.token_hex(nbytes=8)
             self.keys[fname].append(key)
@@ -168,36 +172,44 @@ class Modeler:
         self.status[fname].pop(key, None)
 
     def crdstore(self, status):
-        #print("Storing", self.name)
-        #n = self.base_n + self.my_n
         self.store()
-        status[self.name] = self.status
-        #status["_n"] = n
-        #self.my_n = 0
+        name = self.name[0]
+        status[name] = self.status
 
     def assess(self, data):
-        #print("ASSES self.numExpandedFeatures =", self.numExpandedFeatures)
-        #print(data)
-        data = data[self.name]
-        if not data:
+        alldata = []
+        for namei in range(len(self.name)):
+            name = self.name[namei]
+            if name in data:
+                d = data[name]
+                if (len(d) != self.numFeaturesByName[name]):
+                    print("Modeler", name, "assess - wrong num of features in data", len(data), self.numFeatures)
+                    raise
+                histLen = self.expand[namei]
+                if histLen > 1:
+                    expanded = []
+                    for hist in d:
+                        hist = hist[:histLen] + [0] * (histLen - len(hist))
+                        # print("expendData handling ", hist)
+                        for idx, val in enumerate(hist):
+                            expanded.append(max(0.5, val) / max(0.5, hist[(idx + 1) % histLen]))
+                    d = expanded
+                alldata.extend(d)
+            else:
+                if (0 != self.numFeaturesByName[name]):
+                    print("Modeler", name, "assess - wrong num of features in data", len(data), self.numFeatures)
+                    raise
+        if not alldata:
             print("Modeler", self.name, "assess - No Data", data)
             return([])
-        #print("Asses", self.name, "has",len(data), "expand", self.numExpandedFeatures)
-        if (self.numExpandedFeatures):
-            if (len(data) != self.numExpandedFeatures):
-                print("Modeler", self.name, "assess - wrong num of expanded features in data", len(data), self.numExpandedFeatures)
-                raise
-            data = self.expandData(data)
-        if (len(data) != self.numFeatures):
+
+        if (len(alldata) != self.numFeatures):
             print("Modeler",self.name, "assess - wrong num of features in data", len(data), self.numFeatures)
             raise
         with np.errstate(invalid='raise', divide='raise'):
             try:
-                #self.my_n += 1
-                self.calc(data)
+                self.calc(alldata)
                 self.p[self.cmask] = 0
-                #n = self.base_n + self.my_n
-                #if self.minimumLearning < n:
                 return self.p.tolist()
             except:
                 print(self.name, "Calc except during assess")
@@ -236,12 +248,3 @@ class Modeler:
     def drift(self):
         # virtual function for a modeler to drift concepts
         pass
-
-    #def expandFeatures(self, featureNames):
-        # virtual function for a modeler to expand the crd feature list
-    #    pass
-
-    #def expandData(self, data):
-        # virtual function for a modeler to expand the received sample
-    #    pass
-

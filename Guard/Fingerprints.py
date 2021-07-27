@@ -4,8 +4,9 @@ from Guard import Modeler
 
 
 class Fingerprints(Modeler.Modeler):
-    name = "fingerprints"
+    name = ["fingerprints"]
     maxConcepts  = 4
+    expand = [1]
     def __init__(self, spec):
         super().__init__(spec)
 

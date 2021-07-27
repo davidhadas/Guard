@@ -7,12 +7,12 @@ from Guard import Modeler
 from Guard import gvu
 
 
-
-
 class Markers(Modeler.Modeler):
-    name = "markers"
+    name = ["markers", "integers", "histograms"]
     maxConcepts = 4
-    minSdev2 = 1E-20
+    minSdev2Vals = [1E-20, 0.0625, 0.0625]
+    noise = [1E-10, 0.25, 0.25]
+    expand = [1, 1, 8]
     adjusted3Stddevs = [3.0009015323972648, 3.4399251966400537, 3.762361686930365, 4.031940947451361, 4.267351452930073,
                         4.479967979795997, 4.674375684341177, 4.8561403436466595, 5.025745559845473, 5.186364038411227,
                         5.339664503813593, 5.486382701563869, 5.627180177961487, 5.763642812678808, 5.893025139475057,
@@ -46,8 +46,17 @@ class Markers(Modeler.Modeler):
 
         self.skippedSamples = [[] for _ in range(self.numFeatures)]
         self.g = [gvu.gvu() for _ in range(self.numFeatures)]
-        for g in self.g:
-            g.clear()
+        self.minSdev2 = np.zeros((self.numFeatures, self.maxConcepts))
+        i = 0
+        for name_i in range(len(self.name)):
+            name = self.name[name_i]
+
+            for x in range(self.numExpandedFeaturesByName[name]):
+                for j in range(self.maxConcepts):
+                    self.minSdev2[i,j] = self.minSdev2Vals[name_i]
+                self.g[i].clear()
+                self.g[i].setNoise(self.noise[name_i])
+                i = i + 1
 
     def load(self, fname_idx, key_idx, val):
         #print (val)
@@ -64,7 +73,7 @@ class Markers(Modeler.Modeler):
             s /= 2
             s2 /= 2
 
-        s2 = max(s2, self.minSdev2 * c + (s **2 ) / c )
+        s2 = max(s2, self.minSdev2[fname_idx, key_idx] * c + (s **2 ) / c )
 
         self.base_c[fname_idx, key_idx] = c
         self.base_s[fname_idx, key_idx] = s
@@ -79,9 +88,10 @@ class Markers(Modeler.Modeler):
         c = self.base_c[w]
         s = self.base_s[w]
         s2 = self.base_s2[w]
+        minSdev2 = self.minSdev2[w]
 
         m = s / c
-        sdev = np.sqrt(np.maximum(s2 / c - np.square(m), self.minSdev2))
+        sdev = np.sqrt(np.maximum(s2 / c - np.square(m), minSdev2))
 
         #self.c[fname_idx, key_idx] = c
         self.mean[w] = m
@@ -122,7 +132,7 @@ class Markers(Modeler.Modeler):
                         self.base_c[fname_idx, key_idx_other] = 0
 
                         m = s / c
-                        sdev = math.sqrt(max(s2 / c - m ** 2, self.minSdev2))
+                        sdev = math.sqrt(max(s2 / c - m ** 2, self.minSdev2[fname_idx, key_idx]))
                         self.mean[fname_idx, key_idx] = m
                         self.sdev[fname_idx, key_idx] = sdev
                         self.delKeyIdx(fname_idx, key_idx_other)
@@ -162,7 +172,7 @@ class Markers(Modeler.Modeler):
                     #print("*** Markers *** Learn MEAN and SDEV - free slot", key_idx)
                     result = g.getGuassian()
                     mu = result["driftedGuassian"]["mu"]
-                    sdev = max(result["driftedGuassian"]["sdev"], self.minSdev2)
+                    sdev = max(result["driftedGuassian"]["sdev"], self.minSdev2[fname_idx, key_idx])
                     c = result["driftedGuassian"]["c"]
                     s = mu*c
                     s2 = (sdev**2 + mu**2)*c

@@ -1,5 +1,5 @@
 
-from Guard import Integers
+from Guard import Markers
 import unittest
 
 import numpy
@@ -12,7 +12,7 @@ class MyTestCase(unittest.TestCase):
         pass
 
     def test_learnSingleton(self):
-        m = Integers.Integers({
+        m = Markers.Markers({
             "integers": ["test"]
             , "AllowLimit": 10
             , "LearnLimit": 3
@@ -32,7 +32,7 @@ class MyTestCase(unittest.TestCase):
         self.assertGreater(m.sdev[0][0], 0.2)
 
     def test_store_load(self):
-        m = Integers.Integers({
+        m = Markers.Markers({
             "integers": ["test"]
             , "AllowLimit": 10
             , "LearnLimit": 3
@@ -51,8 +51,8 @@ class MyTestCase(unittest.TestCase):
         #print(status)
 
 
-        self.assertTrue("integers" in status)
-        val = status["integers"]
+        self.assertTrue("markers" in status)
+        val = status["markers"]
         self.assertTrue(isinstance(val, dict))
         self.assertTrue("test" in val)
         val = val["test"]

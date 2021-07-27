@@ -1,7 +1,7 @@
 from Guard import Markers
 from Guard import Modeler
 import sys
-
+'''
 class Integers(Markers.Markers):
     name = "integers"
     minSdev2 = 0.0625
@@ -15,3 +15,4 @@ class Integers(Markers.Markers):
 
 
 Modeler.modelers.append(Integers)
+'''
