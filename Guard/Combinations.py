@@ -441,6 +441,7 @@ class Combinations(Modeler.Modeler):
                 if (self.lr > 0.001):
                     self.lr = self.lr * 0.99
 
+
     def printCurrentFeatures(self):
         return
         for idx, name in enumerate(self.featureNames):
