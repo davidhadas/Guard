@@ -34,9 +34,9 @@ class MyTestCase(unittest.TestCase):
             #self.assertAlmostEqual(r[2], 0, delta = 4)
             m.learn()
 
-        self.assertEqual(len(m.keys["ntest"]), 1)
-        self.assertTrue(len(m.keys["utest"]) > 0)
-        self.assertEqual(len(m.keys["untest"]), 1)
+        self.assertEqual(len(m.keys[0]), 1)
+        self.assertTrue(len(m.keys[1]) > 0)
+        self.assertEqual(len(m.keys[2]), 1)
 
         self.assertAlmostEqual(m.mean[0][0], 100.0, delta=20)
         self.assertAlmostEqual(m.mean[1][0], 200.0, delta=20)
@@ -67,7 +67,7 @@ class MyTestCase(unittest.TestCase):
             r = m.assess({'markers': [nusample]})
             m.learn()
 
-        self.assertTrue(len(m.keys["test"]) > 2)
+        self.assertTrue(len(m.keys[0]) > 2)
 
         self.assertAlmostEqual(m.mean[0][0] % 10000, 100.0, delta=20)
         self.assertAlmostEqual(m.mean[0][1] % 10000, 100.0, delta=20)
@@ -97,7 +97,7 @@ class MyTestCase(unittest.TestCase):
         #print ("Time:", delta, " processing 1K samples of 1000 features")
         self.assertLess(delta, 24)
         for i in range(1000):
-            self.assertGreaterEqual(len(m.keys[str(i)]), 1)
+            self.assertGreaterEqual(len(m.keys[i]), 1)
             self.assertAlmostEqual(m.mean[i][0], 0, delta=0.5)
             self.assertAlmostEqual(m.sdev[i][0], 1, delta=1)
 
@@ -123,7 +123,7 @@ class MyTestCase(unittest.TestCase):
         #print ("Time:", delta, " processing 10K samples of 100 features" )
         self.assertLess(delta, 8)
         for i in range(100):
-            self.assertGreaterEqual(len(m.keys[str(i)]), 1)
+            self.assertGreaterEqual(len(m.keys[i]), 1)
             self.assertAlmostEqual(m.mean[i][0], 0, delta=0.5)
             self.assertAlmostEqual(m.sdev[i][0], 1, delta=1)
 
@@ -136,7 +136,7 @@ class MyTestCase(unittest.TestCase):
             , "minimumLearning": 200
         })
         m.maxConcepts = 100
-        m.reset()
+        m.modelerReset()
         startTime = time.time()
         for j in range(100):
             for i in range(1000):
@@ -148,7 +148,7 @@ class MyTestCase(unittest.TestCase):
         #print ("Time:", delta, "processing 1K samples of 1 feature with 100 concepts")
         self.assertLess(delta, 20)
 
-        self.assertEqual(100, len(m.keys["test"]))
+        self.assertEqual(100, len(m.keys[0]))
         for i in range(100):
             self.assertAlmostEqual(round(m.mean[0][i]) % 100, 0, delta=0.5)
             self.assertAlmostEqual(round(m.sdev[0][i]) % 100, 1, delta=1)
@@ -175,7 +175,7 @@ class MyTestCase(unittest.TestCase):
         #print ("Time:", delta, " processing 100K samples of 10 features" )
         self.assertLess(delta, 20)
         for i in range(10):
-            self.assertGreaterEqual(len(m.keys[str(i)]), 1)
+            self.assertGreaterEqual(len(m.keys[i]), 1)
             self.assertAlmostEqual(m.mean[i][0], 0, delta=0.5)
             self.assertAlmostEqual(m.sdev[i][0], 1, delta=1)
 
@@ -222,7 +222,7 @@ class MyTestCase(unittest.TestCase):
                 self.assertLess(r[0], 2)
                 m.learn()
 
-            self.assertEqual(len(m.keys["test"]), 1)
+            self.assertEqual(len(m.keys[0]), 1)
             self.assertAlmostEqual(m.mean[0][0], x, delta=abs(x*0.01))
             self.assertAlmostEqual(m.sdev[0][0], 0.0, delta=0.01)
 
@@ -306,9 +306,9 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("c" in val)
         self.assertTrue("s" in val)
         self.assertTrue("s2" in val)
-        self.assertEqual(val["c"], 1000)
-        self.assertAlmostEqual(val["s"], 5000, places=1)
-        self.assertAlmostEqual(val["s2"], 25000, places=1)
+        self.assertAlmostEqual(1000, val["c"], delta= 1)
+        self.assertAlmostEqual(val["s"], 5000,delta=10)
+        self.assertAlmostEqual(val["s2"], 25000, delta=100)
 
         status = {"_n": 555, "markers": {   "test": {
                       key: {"c": 555, "s": 555, "s2": 555}
@@ -453,9 +453,9 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue("c" in val)
         self.assertTrue("s" in val)
         self.assertTrue("s2" in val)
-        self.assertEqual(val["c"], 1000)
-        self.assertAlmostEqual(val["s"], 5000, places=1)
-        self.assertAlmostEqual(val["s2"], 25000, places=1)
+        self.assertAlmostEqual(1000, val["c"], delta= 1)
+        self.assertAlmostEqual(val["s"], 5000, delta= 10)
+        self.assertAlmostEqual(val["s2"], 25000, delta= 100)
 
         status = {"_n": 555, "markers": {  "test": {
                       key: {"c": 555, "s": 555, "s2": 555}

@@ -5,11 +5,11 @@ from Guard import Modeler
 
 class Fingerprints(Modeler.Modeler):
     name = ["fingerprints"]
-    maxConcepts  = 4
+    maxConcepts = 4
     expand = [1]
+
     def __init__(self, spec):
         super().__init__(spec)
-
 
     def reset(self):
         self.indexes = np.array([ii for ii in range(self.numFeatures)])
@@ -81,13 +81,13 @@ class Fingerprints(Modeler.Modeler):
 
         p = (self.mean - np.minimum(c, self.mean)) / self.std
         p[notfound] = 100
-        p[self.cmask] = 0
+        p[self.fmask] = 0
         self.p = p
         #print ("fingerprints calc", self.p, c, self.mean, self.std)
 
     def learn(self):
         super().learn()
-        newkeys = np.logical_and(self.notfound, np.logical_not(self.cmask))
+        newkeys = np.logical_and(self.notfound, np.logical_not(self.fmask))
         found = np.logical_not(self.notfound)
 
         for fname_idx in np.where(newkeys)[0]:
@@ -107,8 +107,6 @@ class Fingerprints(Modeler.Modeler):
                 self.storeItem(fname_idx, key_idx, val)
 
         #print("Fingerprints drift all")
-
-
         indexes = self.indexes[found]
         currentIdx = self.currentIdx[found]
         #print("currentSample found", indexes, currentIdx)

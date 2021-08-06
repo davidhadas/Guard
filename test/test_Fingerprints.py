@@ -40,7 +40,7 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         m.crdload(status)
 
-        self.assertEqual(len(m.keys["test"]), 1)
+        self.assertEqual(len(m.keys[0]), 1)
         self.assertAlmostEqual(m.mean[0], 10000, delta=10)
         self.assertLess(m.std[0], 2)
         r = m.assess({'fingerprints': ["ABC"]})
@@ -86,8 +86,8 @@ class MyTestCase(unittest.TestCase):
         m.crdstore(status)
         m.crdload(status)
 
-        self.assertEqual(m.cmask[0], False)
-        self.assertEqual(len(m.keys["test"]), 3)
+        self.assertEqual(m.fmask[0], False)
+        self.assertEqual(len(m.keys[0]), 3)
         self.assertAlmostEqual(m.mean[0], 1500, delta=10)
         self.assertAlmostEqual(m.std[0], 500, delta=10)
         r = m.assess({'fingerprints': ["AAA"]})
@@ -114,8 +114,8 @@ class MyTestCase(unittest.TestCase):
             r = m.assess({'fingerprints': ["X"+str(i)]})
             m.learn()
 
-        self.assertEqual(m.cmask[0], True)
-        self.assertEqual(len(m.keys["test"]), 0)
+        self.assertEqual(m.fmask[0], True)
+        self.assertEqual(len(m.keys[0]), 0)
         r = m.assess({'fingerprints': ["AAA"]})
         self.assertEqual(r[0], 0)
         r = m.assess({'fingerprints': ["BBB"]})
@@ -163,9 +163,9 @@ class MyTestCase(unittest.TestCase):
             m.learn()
 
         #print(m.mean)
-        self.assertEqual(len(m.keys["test1"]), 3)
-        self.assertEqual(len(m.keys["test2"]), 2)
-        self.assertEqual(len(m.keys["test3"]), 1)
+        self.assertEqual(len(m.keys[0]), 3)
+        self.assertEqual(len(m.keys[1]), 2)
+        self.assertEqual(len(m.keys[2]), 1)
 
         status = {}
         m.crdstore(status)

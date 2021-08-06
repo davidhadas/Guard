@@ -225,7 +225,7 @@ def watchGuardians():
                     if t == "DELETED":
                         del (serviceModelers[serviceId])
                         del (serviceStatus[serviceId])
-                        del (serviceData[serviceId])
+                        del (serviceSpec[serviceId])
 
                     if t == "MODIFIED" or t == "ADDED":
                         num += 1
@@ -394,13 +394,13 @@ def watchGates():
                     if t == "MODIFIED" or t == "ADDED":
                         gates[gateId] = gate
 
-                        for serviceId in serviceSpec:
+                        for serviceId in serviceModelers:
                             if gateId in serviceModelers[serviceId]:
                                 for m in serviceModelers[serviceId][gateId]:
                                     m.configFromGate(gateSpec)
 
                     elif t == "DELETED":
-                        for serviceId in serviceSpec:
+                        for serviceId in serviceModelers:
                             if gateId in serviceModelers[serviceId]:
                                 del(serviceModelers[serviceId][gateId])
                                 del(serviceStatus[serviceId][gateId])

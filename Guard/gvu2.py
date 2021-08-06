@@ -4,8 +4,8 @@ import random
 
 class gvu2():
     candidates = 20
-    maxAccuracy = 1E-10
-    noise = 1E-10
+    maxAccuracy = 1E-5
+    noise = 1E-5
 
     def __init__(self):
         self.min0 = np.finfo(np.float64).max
@@ -33,8 +33,8 @@ class gvu2():
         point[0] += 1E-10
         point[1] += 1E-10
 
-        point[0] *= random.gauss(1, self.noise)
-        point[1] *= random.gauss(1, self.noise)
+        #point[0] *= random.gauss(1, self.noise)
+        #point[1] *= random.gauss(1, self.noise)
 
         self.points0.append(point[0])
         self.points1.append(point[1])
@@ -49,93 +49,10 @@ class gvu2():
         return len(self.points0)
 
     def getGuassian(self):
-        if (len(self.points)<30):
-            return {}
-        self._findGuassian()
-        print ("finished")
-        result = {
-                    "guassian":{
-                          "mu":self.gmu
-                        , "sdev": self.gsdev
-                        , "c":  self.gc
-                        , "explains": self.gexplains
-                    } , "driftedGuassian": {
-                          "mu": self.dgmu
-                        , "sdev": self.dgsdev
-                        , "c": self.dgc
-                        , "explains": self.gexplains * self.dgc/self.gc
-                    }
-                }
-        print(result)
-        return result
+        if (len(self.points0)<30):
+            return None
+        return self._findGuassian()
 
-    def _adjustGuassian(self):
-        c = self.gc
-        mu = self.gmu
-        sdev = self.gsdev
-        print("gaussian  ", c, mu, sdev)
-
-        # calculate guassian based on non weighted points
-        c = 0
-        s = 0
-        s2 = 0
-        minpoint = self.max
-        maxpoint = self.min
-        points = []
-        for p in self.points:
-            z = np.divide(np.absolute(p - mu), sdev)
-            # print (p, mu, sdev, z)
-            if (z <= 3):
-                c += 1
-                s += p
-                s2 += p ** 2
-                if (minpoint>p):
-                    minpoint = p
-
-                if (maxpoint < p):
-                    maxpoint = p
-            else:
-                points.append(p)
-        print("gaussian  s/c", s, c)
-        mu = s / c
-        #print(c, s2, s, mu, s2 - s*mu, "s2 - s*mu", (s2 - s*mu))
-        sdev = math.sqrt(max(1E-20,(s2 - s*mu)/c))
-        #print("recalc    ", c, mu, sdev)
-        #print("max-min", maxpoint - minpoint, "6sdev", 6*sdev, "factor", (maxpoint - minpoint)*1.1/(6*sdev))
-
-        # lets see if any of the remaining points now can adjust the guassian
-        flag = True
-        while flag:
-            allpoints = points.copy()
-            points = []
-            flag = False
-            for p in allpoints:
-                z = np.divide(np.absolute(p - mu), sdev)
-                # print (p, mu, sdev, z)
-
-                if (z <= 3):
-                    flag = True
-                    c += 1
-                    s += p
-                    s2 += p ** 2
-                    if (minpoint > p):
-                        minpoint = p
-                    if (maxpoint < p):
-                        maxpoint = p
-                else:
-                    points.append(p)
-            if not flag:
-                break
-            mu = s / c
-            sdev = math.sqrt(max(1E-20,(s2 - s*mu)/c))
-            #print ("add points", c, mu, sdev)
-            #print("max-min", maxpoint - minpoint, "6sdev", 6 * sdev, "factor", (maxpoint - minpoint) * 1.1 / (6 * sdev))
-
-        self.dgmu = mu
-        self.dgsdev = sdev
-        self.dgc = c #self._evaluatePoints(mu, sdev)
-        self._filterCurrentPoints(mu, sdev)
-        #print("Drifted Gaussian", self.dgmu, "STD", self.dgsdev)
 
 
     def _filterCurrentPoints(self, mu, sdev):
@@ -217,18 +134,17 @@ class gvu2():
         # The implementation evaluates a single candidate Guassian and choose the best one at the end
 
         # Normalize data to the range 0 and 1
-        print (self.max0, self.min0)
-        delta0 = (self.max0 - self.min0)
-        delta1 = (self.max1 - self.min1)
+        print ("gvu2 max0", self.max0, "min0",self.min0, "max1", self.max1, "min1",self.min1)
+        delta0 = max(self.max0 - self.min0, self.noise)
+        delta1 = max(self.max1 - self.min1, self.noise)
         delta_min0 = self.min0  # - delta
         delta_min1 = self.min1  # - delta
         points0 = (np.array(self.points0).astype(np.double) - delta_min0) / delta0
         points1 = (np.array(self.points1).astype(np.double) - delta_min1) / delta1
         numPoints = len(points0)
 
-        #check covariance - if low co-variance, no need for auto-encoder
-        corrcoef = np.corrcoef(points0, points1)
-        print("corrcoef", corrcoef)
+
+
         # Add noise to points to avoid later numerical problems
         # As we add noise we normalize data only roughly to the range 0 and 1
         points0 += np.random.normal(0, self.maxAccuracy, numPoints)
@@ -263,16 +179,12 @@ class gvu2():
             pxGivenG = (1/(np.pi*variance0*variance1))*np.exp(-np.square(x0 - mu0)/(2*variance0)-np.square(x1 - mu1)/(2*variance1))
             if (np.any(np.isnan(pxGivenG))):
                 mask = np.isnan(pxGivenG)
-
                 print("Nan on pxGivenG")
-                print("delta_min",delta_min)
-                print("delta", delta)
-                print("variance", variance)
-                print("self.points", self.points)
-                print("x", x)
-                print("mu", mu)
-
-                print("np.exp(-np.square(x - mu)/(2*variance))", np.exp(-np.square(x - mu)/(2*variance))[mask])
+                print("x0 - mu0",x0[mask] - mu0[mask])
+                print("variance0", variance0[mask])
+                print("x1 - mu1", x1[mask] - mu0[mask])
+                print("variance1", variance1[mask])
+                print("np.pi*variance0*variance1", np.pi*variance0[mask]*variance1[mask])
                 break
 
             # calculate w - the probability of each of the points to come from the gaussian
@@ -310,22 +222,28 @@ class gvu2():
         maximal = np.argmax(pGaus)
         #print ("pGaus",pGaus, "\nsdev", sdev)
         w = w[maximal]
-        self.gmu0 = mu0[maximal] * delta0 + delta_min0
-        self.gmu1 = mu1[maximal] * delta1 + delta_min1
+        gmu0 = mu0[maximal] * delta0 + delta_min0
+        gmu1 = mu1[maximal] * delta1 + delta_min1
 
-        self.gsdev0 = sdev0[maximal]*delta0
-        self.gsdev1 = sdev1[maximal]*delta1
+        gsdev0 = sdev0[maximal]*delta0
+        gsdev1 = sdev1[maximal]*delta1
 
-        self.gexplains = pGaus[maximal]
+        gexplains = pGaus[maximal]
 
         #self.gc = self._evaluatePoints(self.gmu0, self.gmu1, self.gsdev0, self.gsdev1)
-        print("Best Gaussian", self.gmu0, self.gmu1, "STD", self.gsdev0, self.gsdev1, "explains", self.gexplains, "of points")
+        print("Best Gaussian", gmu0, gmu1, "STD", gsdev0, gsdev1, "explains", gexplains, "of points")
         where = w > 0.5
-        print (where.shape, points0.shape)
+
+        #print (where.shape, points0.shape)
         #self._train(points0, points1)
         #print("---")
+
         points0 = points0[where] * delta0 + delta_min0
         points1 = points1[where] * delta1 + delta_min1
+
+        # check covariance - if low co-variance, no need for auto-encoder
+        corrcoef = np.corrcoef(points0, points1)
+        print("corrcoef", corrcoef)
 
         return points0, points1 #, self._train(points0, points1)
         #self._adjustGuassian()
@@ -334,16 +252,18 @@ class gvu2():
 import random
 
 #import autoencoder
+'''
 g = gvu2()
-for i in range(1):
+for i in range(0):
     g.addPoint((random.gauss(100, 10), 5))
-for i in range(1):
+for i in range(0):
     g.addPoint((random.gauss(300, 2), 60))
 for i in range(0):
     g.addPoint((random.gauss(300, 1), 40))
 
 points0, points1 = g._findGuassian()
 print("len(points0)",len(points0), points0, points1)
+'''
 
 #a = autoencoder.autoencoder(2,1)
 #a.set(ib, i0w, i1w, hb0, hw0, hb1, hw1)
@@ -354,12 +274,18 @@ print("len(points0)",len(points0), points0, points1)
 #print("nodata", a.forward_propagate((random.gauss(300, 10), 60))/a.network_error )
 
 #b = autoencoder.autoencoder(2,1)
+'''
+
+
+
 for j in range(1):
     for i in range(len(points0)):
         row = [points0[i], points1[i]]
 #        error = b.forward_propagate(row + [None])
 #        b.backward_propagate_error(row)
 #        b.update_weights(row)
+'''
+
 #print (b.network_error)
 #print("b data  ", b.forward_propagate((random.gauss(100, 10), 5))/b.network_error )
 #print("b nodata", b.forward_propagate((random.gauss(300, 10), 60))/b.network_error )

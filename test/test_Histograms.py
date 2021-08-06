@@ -29,7 +29,7 @@ class MyTestCase(unittest.TestCase):
             self.assertLess(r[0], 0.25)
             m.learn()
         #print(m.mean)
-        self.assertEqual(len(m.keys["test-01"]), 1)
+        self.assertEqual(len(m.keys[0]), 1)
         self.assertAlmostEqual(m.mean[0][0], 2E10, delta=1E9)
         self.assertLess(m.sdev[0][0], 1E9)
         self.assertAlmostEqual(m.mean[1][0], 0.5, delta=0.05)

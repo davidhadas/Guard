@@ -122,14 +122,14 @@ class gvu():
         # The implementation evaluates a set of candidate Guassians and choose the best one at the end
 
         # Normalize data to the range 0 and 1
-        delta = max(self.max - self.min, self.noise)
+        delta = max(self.max - self.min, self.noise*3)
         delta_min = self.min  #- delta
         points = (np.array(self.points).astype(np.double) - delta_min)/delta
         numPoints = len(points)
 
         # Add noise to points to avoid later numerical problems
         # As we add noise we normalize data only roughly to the range 0 and 1
-        points += np.random.normal(0, self.maxAccuracy, numPoints)
+        points += np.random.normal(0, self.noise, numPoints)
         #print("points", points)
         # Array of points broadcasted to all candidates
         x = np.tile(points, (self.candidates,1))

@@ -29,9 +29,11 @@ class Modeler:
     maxConcepts = 1
 
     def __init__(self, spec):
+        self.dlevel = 0
         self.numExpandedFeatures = 0
         self.configFromGate(spec)
-        self.modelerReset()
+
+
 
         #print("INIT self.numExpandedFeatures =", self.numExpandedFeatures)
 
@@ -59,24 +61,28 @@ class Modeler:
                 self.featureNames.extend(fns)
                 self.numExpandedFeaturesByName[name] = len(fns)
         self.numFeatures = len(self.featureNames)
+        self.config(spec)
+        self.modelerReset()
 
     def modelerReset(self):
         print("Reset", self.name, "numFeatures", self.numFeatures)
         self.p = np.zeros(self.numFeatures)
-        self.cmask = [False for ii in range(self.numFeatures)]
+        self.fmask = np.zeros(self.numFeatures, dtype=bool)
+        self.unused = np.ones((self.numFeatures, self.maxConcepts), dtype=bool)
+        #print("modelerReset self.unused.shape", self.unused.shape)
         self.status = {}
-        self.keys = {}
+        self.keys = [[] for ii in range(self.numFeatures)]
         for fname in self.featureNames:
             self.status[fname] = {}
-            self.keys[fname] = []
         self.reset()
 
     def mask(self, fname_idx, text):
         fname = self.featureNames[fname_idx]
         print("Modeler", self.name, fname, text)
 
-        self.cmask[fname_idx] = True
-        self.keys[fname] = []
+        self.fmask[fname_idx] = True
+        self.unused[fname_idx, :] = True
+        self.keys[fname_idx] = []
         self.status[fname] = {"tombstone": {}}
 
 
@@ -97,7 +103,7 @@ class Modeler:
             if fname not in self.featureNames:
                 continue
             fname_idx = self.featureNames.index(fname)
-            if self.cmask[fname_idx]:
+            if self.fmask[fname_idx]:
                 continue
 
             # update existing concepts
@@ -108,10 +114,10 @@ class Modeler:
 
             newKeys = []
             for key in keys:
-                if key not in self.keys[fname]:
+                if key not in self.keys[fname_idx]:
                     newKeys.append(key)
                     continue
-                key_idx = self.keys[fname].index(key)
+                key_idx = self.keys[fname_idx].index(key)
                 val = values[key]
                 if not val or not isinstance(val, dict) or 'c' not in val:
                     continue
@@ -140,36 +146,41 @@ class Modeler:
                 try:
                     #print("New Concept loading")
                     self.load(fname_idx, key_idx, val)
+
                 except Exception as e:
-                    self.delKeyIdx(fname_idx, key_idx)
-                    print("ilegal value during new key in load", fname_idx, key_idx, val, e)
+                    del self.keys[fname_idx][key_idx]
+                    self.unused[(fname_idx, key_idx)] = True
+                    print("illegal value during new key in load", fname_idx, key_idx, val, e)
         self.drift()
 
     def storeItem(self, fname_idx, key_idx, val):
         fname = self.featureNames[fname_idx]
-        if key_idx >= len(self.keys[fname]):
+        if key_idx >= len(self.keys[fname_idx]):
             print("Modeler", self.name, fname, "BUG BUG BUG - StoreItem with illegal index!")
             return
 
-        key = self.keys[fname][key_idx]
-        self.status[fname][key] = val
+        key = self.keys[fname_idx][key_idx]
+        if key: # i.e. if key not deleted
+            self.status[fname][key] = val
 
     def getKeyIdx(self, fname_idx, key=None):
-        fname = self.featureNames[fname_idx]
-        key_idx = len(self.keys[fname])
+        #fname = self.featureNames[fname_idx]
+        key_idx = len(self.keys[fname_idx])
         if (self.maxConcepts > key_idx):
             if not key:
                 key = secrets.token_hex(nbytes=8)
-            self.keys[fname].append(key)
+            self.keys[fname_idx].append(key)
+            self.unused[(fname_idx, key_idx)] = False
             return key_idx
         self.mask(fname_idx, "masked by getKeyIdx")
         return None
 
     def delKeyIdx(self, fname_idx, key_idx):
-        keys = []
-        fname = self.featureNames[fname_idx]
-        key = self.keys[fname].pop(key_idx)
-        self.status[fname].pop(key, None)
+        #keys = []                                    # we also use it to map key_idx to the key name in storeItem
+        #fname = self.featureNames[fname_idx]
+        #key = self.keys[fname_idx][key_idx]
+        self.keys[fname_idx][key_idx] = ""
+        self.unused[(fname_idx, key_idx)] = True
 
     def crdstore(self, status):
         self.store()
@@ -177,6 +188,7 @@ class Modeler:
         status[name] = self.status
 
     def assess(self, data):
+        #print("asses self.numFeatures, self.maxConcepts", self.numFeatures, self.maxConcepts)
         alldata = []
         for namei in range(len(self.name)):
             name = self.name[namei]
@@ -209,7 +221,7 @@ class Modeler:
         with np.errstate(invalid='raise', divide='raise'):
             try:
                 self.calc(alldata)
-                self.p[self.cmask] = 0
+                self.p[self.fmask] = 0
                 return self.p.tolist()
             except:
                 print(self.name, "Calc except during assess")
@@ -224,6 +236,9 @@ class Modeler:
                 print (self.name, "is blocking based on", fname)
             elif p>self.LearnLimit:
                 print (self.name, "avoid learning based on", fname)
+
+    def debug(self, level):
+        self.dlevel = level
 
     def reset(self):
         # virtual function for a modeler to reset the model
@@ -248,3 +263,8 @@ class Modeler:
     def drift(self):
         # virtual function for a modeler to drift concepts
         pass
+
+    def config(self, spec):
+        # virtual function for a modeler to drift concepts
+        pass
+

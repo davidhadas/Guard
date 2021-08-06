@@ -26,25 +26,31 @@ class Markers(Modeler.Modeler):
         super().__init__(spec)
         self.threeStdQuantile = self.adjusted3Stddevs[0]
 
-
     def reset(self):
         self.mean = np.ones((self.numFeatures, self.maxConcepts))*np.finfo(np.float64).min
         self.sdev = np.ones((self.numFeatures, self.maxConcepts))
+        self.indexes = np.array([ii for ii in range(self.numFeatures)])
 
+
+        #best_concept  = {}
+        #for fname in self.featureNames:
+        #    best_concept = {fname: ""}
+        #self.bast_concept = best_concept
+        #print ("reset self.numFeatures, self.maxConcepts", self.numFeatures, self.maxConcepts)
         self.z = np.zeros((self.numFeatures, self.maxConcepts))
-        self.currentSample = np.zeros((self.numFeatures, self.maxConcepts))
+        #####? self.currentSample = np.zeros((self.numFeatures, self.maxConcepts))
+        self.currentSample = np.zeros(self.numFeatures)
         #self.c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
 
         self.base_s = np.zeros((self.numFeatures, self.maxConcepts))
         self.base_s2 = np.zeros((self.numFeatures, self.maxConcepts))
         self.base_c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
 
-
         self.my_s = np.zeros((self.numFeatures, self.maxConcepts))
         self.my_s2 = np.zeros((self.numFeatures, self.maxConcepts))
         self.my_c = np.zeros((self.numFeatures, self.maxConcepts), dtype=int)
 
-        self.skippedSamples = [[] for _ in range(self.numFeatures)]
+        #self.skippedSamples = [[] for _ in range(self.numFeatures)]
         self.g = [gvu.gvu() for _ in range(self.numFeatures)]
         self.minSdev2 = np.zeros((self.numFeatures, self.maxConcepts))
         i = 0
@@ -79,9 +85,9 @@ class Markers(Modeler.Modeler):
         self.base_s[fname_idx, key_idx] = s
         self.base_s2[fname_idx, key_idx] = s2
 
-        c  += self.my_c[fname_idx, key_idx]
-        s  += self.my_s[fname_idx, key_idx]
-        s2 += self.my_s2[fname_idx, key_idx]
+        #c  += self.my_c[fname_idx, key_idx]
+        #s  += self.my_s[fname_idx, key_idx]
+        #s2 += self.my_s2[fname_idx, key_idx]
 
     def drift(self):
         w = np.where(self.base_c>0)
@@ -152,11 +158,22 @@ class Markers(Modeler.Modeler):
         self.printCurrentFeatures()
 
     def calc(self, data):
-        self.currentSample = sarray = np.tile(data, (self.maxConcepts, 1)).T
+        #print ("calc self.numFeatures, self.maxConcepts", self.numFeatures, self.maxConcepts)
+
+        self.currentSample = np.array(data)
+        sarray = np.tile(data, (self.maxConcepts, 1)).T
 
         self.z = np.divide(np.absolute(sarray - self.mean), self.sdev)
         #print("markers self.z", self.z)
-        self.p = np.amin(self.z, axis=1)
+
+        #minz = np.argmin(self.z, axis=1)
+        #self.p = self.z[self.indexes, minz]
+        #print("self.z.shape", self.z.shape)
+        #print("self.unused.shape", self.unused.shape)
+        self.z[self.unused] = 1000
+        self.minz = np.argmin(self.z, axis=1)
+        self.p = self.z[self.indexes, self.minz]
+        #self.p = np.amin(self.z, axis=1)
         #print ("markers self.p", self.p, sarray,  self.mean, np.absolute(sarray - self.mean), self.sdev, self.z)
 
     def learn(self):
@@ -165,7 +182,8 @@ class Markers(Modeler.Modeler):
             #print("*** Markers *** Learn ", fname_idx, self.p[fname_idx], self.g[fname_idx])
             self.p[fname_idx] = self.threeStdQuantile
             g = self.g[fname_idx]
-            if (g.addPoint(self.currentSample[fname_idx][0]) > 100):
+            ######? if (g.addPoint(self.currentSample[fname_idx][0]) > 100):
+            if (g.addPoint(self.currentSample[fname_idx]) > 100):
                 #print("*** Markers *** Learn MEAN and SDEV")
                 key_idx = self.getKeyIdx(fname_idx)
                 if key_idx is not None:
@@ -198,15 +216,17 @@ class Markers(Modeler.Modeler):
 
         indexs = (self.z == np.tile(self.p, (self.maxConcepts, 1)).T)
         #print("drift all ", indexs)
-        s = self.currentSample[indexs]
-        self.my_c[indexs] += 1
-        self.my_s[indexs] += s
-        self.my_s2[indexs] += np.square(s)
+        #####? s = self.currentSample[indexs]
+        s = self.currentSample
+
+        self.my_c[self.indexes, self.minz] += 1
+        self.my_s[self.indexes, self.minz] += s
+        self.my_s2[self.indexes, self.minz] += np.square(s)
 
     def printCurrentFeatures(self):
         return
         for idx, name in enumerate(self.featureNames):
-            print("printCurrentFeatures", name, self.mean[idx], self.sdev[idx], self.cmask[idx], len(self.g[idx].points), self.base_c[idx], self.base_s[idx], self.base_s2[idx])
+            print("printCurrentFeatures", name, self.mean[idx], self.sdev[idx], self.fmask[idx], len(self.g[idx].points), self.base_c[idx], self.base_s[idx], self.base_s2[idx])
 
 
 Modeler.modelers.append(Markers)

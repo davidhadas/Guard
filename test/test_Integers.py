@@ -26,7 +26,7 @@ class MyTestCase(unittest.TestCase):
             r = m.assess({'integers': [5]})
             self.assertLess(r[0], 0.25)
             m.learn()
-        self.assertEqual(len(m.keys["test"]), 1)
+        self.assertEqual(len(m.keys[0]), 1)
         self.assertAlmostEqual(m.mean[0][0], 5.0, delta=0.2)
         self.assertLess(m.sdev[0][0], 1.5)
         self.assertGreater(m.sdev[0][0], 0.2)
